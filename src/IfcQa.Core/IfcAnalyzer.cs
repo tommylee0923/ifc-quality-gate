@@ -30,12 +30,12 @@ public sealed class IfcAnalyzer
 
         var byClass = products
             .GroupBy(p => p.ExpressType.Name)
-            .Select(g => new IfcClassStats
+            .Select(n => new IfcClassStats
             {
-                IfcClass = g.Key,
-                Count = g.Count(),
-                WithAnyPsetCount = g.Count(HasAnyPropertySet),
-                WithAnyQtoCount = g.Count(HasAnyQuantitySet)
+                IfcClass = n.Key,
+                Count = n.Count(),
+                WithAnyPsetCount = n.Count(HasAnyPropertySet),
+                WithAnyQtoCount = n.Count(HasAnyQuantitySet)
             })
             .OrderByDescending(x => x.Count)
             .ToList();
@@ -45,17 +45,17 @@ public sealed class IfcAnalyzer
             .Select(ps => ps.Name?.ToString())
             .Where(n => !string.IsNullOrWhiteSpace(n))
             .GroupBy(n => n!)
-            .OrderByDescending(g => g.Count())
-            .Select(g => new NameCount(g.Key, g.Count()))
+            .OrderByDescending(n => n.Count())
+            .Select(n => new NameCount(n.Key, n.Count()))
             .ToList();
 
         var allQtoNames = products
             .SelectMany(GetQuantitySets)
-            .Select(q => q.Name?.ToString())
+            .Select(n => n.Name?.ToString())
             .Where(n => !string.IsNullOrWhiteSpace(n))
             .GroupBy(n => n!)
             .OrderByDescending(g => g.Count())
-            .Select(g => new NameCount(g.Key, g.Count()))
+            .Select(n => new NameCount(n.Key, n.Count()))
             .ToList();
 
         var walls = products.Where(p => p.ExpressType.Name.Equals("IfcWall", StringComparison.OrdinalIgnoreCase)
