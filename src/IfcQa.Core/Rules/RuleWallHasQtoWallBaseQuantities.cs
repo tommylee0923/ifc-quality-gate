@@ -10,7 +10,7 @@ namespace IfcQa.Core.Rules
 {
     public sealed class RuleHasQtoWallBaseQuantities : IRule
     {
-        public string Id => "W002";
+        public string Id => "W102";
         public Severity Severity => Severity.Warning;
 
         public IEnumerable<Issue> Evaluate(IfcStore model)

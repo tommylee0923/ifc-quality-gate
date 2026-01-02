@@ -10,3 +10,4 @@ C:\Users\Tommy Lee\Documents\Project\IfcQaTool\src\IfcQa.Core\obj\Debug\net8.0\I
 C:\Users\Tommy Lee\Documents\Project\IfcQaTool\src\IfcQa.Core\obj\Debug\net8.0\refint\IfcQa.Core.dll
 C:\Users\Tommy Lee\Documents\Project\IfcQaTool\src\IfcQa.Core\obj\Debug\net8.0\IfcQa.Core.pdb
 C:\Users\Tommy Lee\Documents\Project\IfcQaTool\src\IfcQa.Core\obj\Debug\net8.0\ref\IfcQa.Core.dll
+C:\Users\Tommy Lee\Documents\Project\IfcQaTool\src\IfcQa.Core\obj\Debug\net8.0\IfcQa.Core.sourcelink.json

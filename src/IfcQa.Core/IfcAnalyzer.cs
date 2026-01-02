@@ -34,14 +34,14 @@ public sealed class IfcAnalyzer
             {
                 IfcClass = n.Key,
                 Count = n.Count(),
-                WithAnyPsetCount = n.Count(HasAnyPropertySet),
-                WithAnyQtoCount = n.Count(HasAnyQuantitySet)
+                WithAnyPsetCount = n.Count(p => IfcPropertyUtils.HasAnyPset(p)),
+                WithAnyQtoCount = n.Count(p => IfcPropertyUtils.HasAnyQto(p))
             })
             .OrderByDescending(x => x.Count)
             .ToList();
 
         var allPsetNames = products
-            .SelectMany(GetPropertySets)
+            .SelectMany(p => IfcPropertyUtils.GetPropertySets(p))
             .Select(ps => ps.Name?.ToString())
             .Where(n => !string.IsNullOrWhiteSpace(n))
             .GroupBy(n => n!)
@@ -50,7 +50,7 @@ public sealed class IfcAnalyzer
             .ToList();
 
         var allQtoNames = products
-            .SelectMany(GetQuantitySets)
+            .SelectMany(p => IfcPropertyUtils.GetQuantitySets(p))
             .Select(n => n.Name?.ToString())
             .Where(n => !string.IsNullOrWhiteSpace(n))
             .GroupBy(n => n!)
@@ -62,8 +62,8 @@ public sealed class IfcAnalyzer
                                      || p.ExpressType.Name.Equals("IfcWallStandardCase", StringComparison.OrdinalIgnoreCase))
                             .ToList();
 
-        int wallsWithPsetWallCommon = walls.Count(w => GetPropertySets(w).Any(ps => ps.Name?.ToString() == "Pset_WallCommon"));
-        int wallsWithQtoWallQuantities = walls.Count(w => GetQuantitySets(w).Any(q => q.Name?.ToString() == "Qto_WallQuantities"));
+        int wallsWithPsetWallCommon = walls.Count(w => IfcPropertyUtils.GetPropertySets(w).Any(ps => ps.Name?.ToString() == "Pset_WallCommon"));
+        int wallsWithQtoWallQuantities = walls.Count(w => IfcPropertyUtils.GetQuantitySets(w).Any(q => q.Name?.ToString() == "Qto_WallQuantities"));
 
         return new IfcSummaryReport
         {
@@ -88,34 +88,30 @@ public sealed class IfcAnalyzer
         IRule[] rules =
             [
                 new RuleMissingName(),
+                new RuleMissingContainment(),
                 new RuleDuplicateGlobalId(),
-                new RuleWallHasPsetWallCommon(),
-                new RuleHasQtoWallBaseQuantities()
+
+                //Walls
+                new RuleRequirePset("W101", Severity.Error, "IfcWall", "Pset_WallCommon"),
+                new RuleRequireQto("W102", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities"),
+                new RuleRequirePset("W101", Severity.Error, "IfcStandardCase", "Pset_WallCommon"),
+                new RuleRequireQto("W102", Severity.Warning, "IfcStandardCase", "Qto_WallBaseQuantities"),
+
+                //Slabs
+                new RuleRequirePset("S101", Severity.Error, "IfcSlab", "Pset_SlabCommon"),
+                new RuleRequireQto("S102", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities"),
+
+                //Roof
+                new RuleRequirePset("R101", Severity.Error, "IfcRoof", "Pset_RoofCommon"),
+                new RuleRequireQto("R102", Severity.Warning, "IfcRoof", "Qto_RoofBaseQuantities"),
+
+                //Spaces
+                new RuleRequirePset("SP101", Severity.Error, "IfcSpace", "Pset_SpaceCommon")
             ];
 
         var issues = rules.SelectMany(r => r.Evaluate(model)).ToList();
         return new IfcQaRunResult(ifcPath, issues);
     }
-    private static bool HasAnyPropertySet(IIfcProduct p) => GetPropertySets(p).Any();
-    private static bool HasAnyQuantitySet(IIfcProduct p) => GetQuantitySets(p).Any();
-    private static IEnumerable<IIfcPropertySet> GetPropertySets(IIfcProduct p)
-    {
-        // IsDefinedBy includes both type + property relations;
-        // filter to RelDefinesByProperties => PropertySet
-        return p.IsDefinedBy
-            .OfType<IIfcRelDefinesByProperties>()
-            .Select(r => r.RelatingPropertyDefinition)
-            .OfType<IIfcPropertySet>();
-    }
-
-    private static IEnumerable<IIfcElementQuantity> GetQuantitySets(IIfcProduct p)
-    {
-        return p.IsDefinedBy
-            .OfType<IIfcRelDefinesByProperties>()
-            .Select(r => r.RelatingPropertyDefinition)
-            .OfType<IIfcElementQuantity>();
-    }
-
     public sealed class IfcSummaryReport
     {
         public required string IfcPath { get; init; }

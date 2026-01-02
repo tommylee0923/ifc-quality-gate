@@ -1,5 +1,0 @@
-RuleId,Severity,IfcClass,GlobalId,Name,Message
-"W002","Warning","IfcWall","1AQAupaRP1txwK1AGiN61V","house - outer wall - house right front","Wall is missing quantity set (recommended): Qto_WallBaseQuantities"
-"W002","Warning","IfcWall","3wdauVJT5Fx9drrREiDqA$","house - outer wall - house right back","Wall is missing quantity set (recommended): Qto_WallBaseQuantities"
-"W002","Warning","IfcWall","0OfZwWc8j9QP5uX8xPTxDH","house - outer wall - house left","Wall is missing quantity set (recommended): Qto_WallBaseQuantities"
-"W002","Warning","IfcWall","1uS5vfZPn9R8PlAaVd73on","plumbing wall","Wall is missing quantity set (recommended): Qto_WallBaseQuantities"
