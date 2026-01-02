@@ -23,10 +23,11 @@ namespace IfcQa.Core.Catalog
             {
                 var ifcClass = p.ExpressType.Name;
 
-                var defs = IfcPropertyUtils.GetPropertySetDefinition(p);
+                var pDefs = IfcPropertyUtils.GetAllPropertySets(p);
+                var qDefs = IfcPropertyUtils.GetAllQuantitySets(p);
 
-                var pset = defs.OfType<IIfcPropertySet>().ToList();
-                var qto = defs.OfType<IIfcElementQuantity>().ToList();
+                var pset = pDefs.OfType<IIfcPropertySet>().ToList();
+                var qto = qDefs.OfType<IIfcElementQuantity>().ToList();
 
                 foreach (var ps in pset)
                 {

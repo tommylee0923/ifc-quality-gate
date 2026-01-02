@@ -7,14 +7,14 @@ namespace IfcQa.Core
 {
     public static class IfcPropertyUtils
     {
-        public static IEnumerable<IIfcPropertySetDefinition> GetPropertySetDefinition( IIfcProduct p)
+        public static IEnumerable<IIfcPropertySet> GetAllPropertySets(IIfcProduct p)
         {
             var inst = p.IsDefinedBy
                 .OfType<IIfcRelDefinesByProperties>()
                 .Select(r => r.RelatingPropertyDefinition)
-                .OfType<IIfcPropertySetDefinition>();
+                .OfType<IIfcPropertySet>();
 
-            var typeDefs = Enumerable.Empty<IIfcPropertySetDefinition>();
+            var typeDefs = Enumerable.Empty<IIfcPropertySet>();
             if (p is IIfcObject obj)
             {
                 typeDefs = obj.IsTypedBy
@@ -22,12 +22,33 @@ namespace IfcQa.Core
                     .Select(r => r.RelatingType)
                     .OfType<IIfcTypeObject>()
                     .SelectMany(t => t.HasPropertySets)
-                    .OfType<IIfcPropertySetDefinition>();
+                    .OfType<IIfcPropertySet>();
             }
 
             return inst.Concat(typeDefs);
         }
-        
+
+        public static IEnumerable<IIfcElementQuantity> GetAllQuantitySets(IIfcProduct p)
+        {
+            var inst = p.IsDefinedBy
+                .OfType<IIfcRelDefinesByProperties>()
+                .Select(r => r.RelatingPropertyDefinition)
+                .OfType<IIfcElementQuantity>();
+
+            var typeDefs = Enumerable.Empty<IIfcElementQuantity>();
+            if (p is IIfcObject obj)
+            {
+                typeDefs = obj.IsTypedBy
+                    .OfType<IIfcRelDefinesByType>()
+                    .Select(r => r.RelatingType)
+                    .OfType<IIfcTypeObject>()
+                    .SelectMany(t => t.HasPropertySets)
+                    .OfType<IIfcElementQuantity>();
+            }
+
+            return inst.Concat(typeDefs);
+        }
+
         public static IEnumerable<IIfcPropertySet> GetPropertySets(IIfcProduct p) =>
             p.IsDefinedBy
             .OfType<IIfcRelDefinesByProperties>()
