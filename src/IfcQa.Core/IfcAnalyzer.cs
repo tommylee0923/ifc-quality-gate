@@ -58,13 +58,6 @@ public sealed class IfcAnalyzer
             .Select(n => new NameCount(n.Key, n.Count()))
             .ToList();
 
-        var walls = products.Where(p => p.ExpressType.Name.Equals("IfcWall", StringComparison.OrdinalIgnoreCase)
-                                     || p.ExpressType.Name.Equals("IfcWallStandardCase", StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-
-        int wallsWithPsetWallCommon = walls.Count(w => IfcPropertyUtils.GetPropertySets(w).Any(ps => ps.Name?.ToString() == "Pset_WallCommon"));
-        int wallsWithQtoWallQuantities = walls.Count(w => IfcPropertyUtils.GetQuantitySets(w).Any(q => q.Name?.ToString() == "Qto_WallQuantities"));
-
         return new IfcSummaryReport
         {
             IfcPath = ifcPath,
@@ -72,12 +65,6 @@ public sealed class IfcAnalyzer
             ByClass = byClass,
             TopPsets = allPsetNames.Take(30).ToList(),
             TopQtos = allQtoNames.Take(30).ToList(),
-            //WallQuickStats = new WallQuickStats
-            //{
-            //    WallCount = walls.Count,
-            //    WithPset_WallCommon = wallsWithPsetWallCommon,
-            //    WithQto_WallQuantities = wallsWithQtoWallQuantities
-            //}
         };
     }
 
@@ -98,16 +85,19 @@ public sealed class IfcAnalyzer
                 new RuleRequireQto("W102", Severity.Warning, "IfcWallStandardCase", "Qto_WallBaseQuantities"),
                 new RuleRequirePsetPropertyKeys("W201", Severity.Error,   "IfcWall", "Pset_WallCommon", "IsExternal"),
                 new RuleRequirePsetPropertyKeys("W202", Severity.Warning, "IfcWall", "Pset_WallCommon", "LoadBearing"),
-
-                // Spaces: Pset_SpaceCommon keys exist: GrossPlannedArea, NetPlannedArea, etc.
+                new RuleRequirePsetPropertyValueBool("W301", Severity.Error, "IfcWall", "Pset_WallCommon", "IsExternal"),
+                new RuleRequirePsetPropertyValueBool("W302", Severity.Warning, "IfcWall", "Pset_WallCommon", "LoadBearing"),
+                new RuleRequirePsetPropertyValueBool("W301", Severity.Error, "IfcWallStandcardCase", "Pset_WallCommon", "IsExternal"),
+                new RuleRequirePsetPropertyValueBool("W302", Severity.Warning, "IfcWallStandcardCase", "Pset_WallCommon", "LoadBearing"),
 
                 //Slabs
                 new RuleRequirePset("S101", Severity.Error, "IfcSlab", "Pset_SlabCommon"),
                 new RuleRequireQto("S102", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities"),
+                new RuleRequirePsetPropertyValueBool("S301", Severity.Warning, "IfcSlab", "Pset_SlabCommon", "IsExternal"),
 
                 //Roof
                 new RuleRequirePset("R101", Severity.Warning, "IfcRoof", "Pset_RoofCommon"),
-                new RuleRequireQto("R102", Severity.Warning, "IfcRoof", "Qto_RoofBaseQuantities"),
+                //new RuleRequireQto("R102", Severity.Warning, "IfcRoof", "Qto_RoofBaseQuantities"),
 
                 //Spaces
                 new RuleRequirePset("SP101", Severity.Warning, "IfcSpace", "Pset_SpaceCommon"),
@@ -127,7 +117,6 @@ public sealed class IfcAnalyzer
         public List<IfcClassStats> ByClass { get; init; } = new();
         public List<NameCount> TopPsets { get; init; } = new();
         public List<NameCount> TopQtos { get; init; } = new();
-        //public WallQuickStats WallQuickStats { get; init; } = new();
     }
 
     public sealed class IfcClassStats
@@ -139,13 +128,6 @@ public sealed class IfcAnalyzer
         public double WithAnyPsetPct => Count == 0 ? 0 : (double)WithAnyPsetCount / Count;
         public double WithAnyQtoPct => Count == 0 ? 0 : (double)WithAnyQtoCount / Count;
     }
-
-    //public sealed class WallQuickStats
-    //{
-    //    public int WallCount { get; init; }
-    //    public int WithPset_WallCommon { get; init; }
-    //    public int WithQto_WallQuantities { get; init; }
-    //}
 
     public sealed record NameCount(string Name, int Count);
 }

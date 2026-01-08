@@ -64,13 +64,11 @@ namespace IfcQa.Core
         public static bool HasAnyPset(IIfcProduct p) => GetPropertySets(p).Any();
         public static bool HasAnyQto(IIfcProduct p) => GetQuantitySets(p).Any();
         public static bool HasPset(IIfcProduct p, string psetName) =>
-            GetPropertySets(p)
-            .OfType<IIfcPropertySet>()
+            GetAllPropertySets(p)
             .Any(ps => ps.Name?.ToString() == psetName);
 
         public static bool HasQto(IIfcProduct p, string qtoName) =>
-            GetPropertySets(p)
-            .OfType<IIfcElementQuantity>()
+            GetAllQuantitySets(p)
             .Any(q => q.Name?.ToString() == qtoName);
     }
 }

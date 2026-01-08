@@ -3,9 +3,7 @@ using System.Text.Json;
 using IfcQa.Core;
 using IfcQa.Core.Catalog;
 
-//var ifcPath = args.Length > 0 ? args[0] : @"C:\Users\Tommy Lee\Documents\Project\IfcQaTool\samples\Building-Architecture.ifc";
-
-var cmd = (args.Length > 0? args[0].ToLowerInvariant() : "");
+var cmd = (args.Length > 0 ? args[0].ToLowerInvariant() : "");
 
 if (args.Length == 0)
 {
@@ -49,7 +47,7 @@ if (cmd == "check")
 
 
     var issueJson = JsonSerializer.Serialize(run, new JsonSerializerOptions { WriteIndented = true });
-    File.WriteAllText("issues.json", json);
+    File.WriteAllText("issues.json", issueJson);
     Console.WriteLine("\nWrote issues.json.");
 
     File.WriteAllText("issue.csv", BuildIssuesCsv(run.Issues));
