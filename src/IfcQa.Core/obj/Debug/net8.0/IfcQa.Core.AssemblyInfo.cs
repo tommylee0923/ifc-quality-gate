@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IfcQa.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9e83668265333260f79957e5e87eb041a73cc512")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fa9f87feb5e4921189b8978135133f05c5a41daa")]
 [assembly: System.Reflection.AssemblyProductAttribute("IfcQa.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IfcQa.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
