@@ -23,25 +23,38 @@ namespace IfcQa.Core.Catalog
             {
                 var ifcClass = p.ExpressType.Name;
 
-                var pDefs = IfcPropertyUtils.GetAllPropertySets(p);
-                var pset = pDefs.OfType<IIfcPropertySet>().ToList();
-
-                var qDefs = IfcPropertyUtils.GetAllQuantitySets(p);
-                var qto = qDefs.OfType<IIfcElementQuantity>().ToList();
-
-                foreach (var ps in pset)
+                // Psets
+                var psets = IfcPropertyUtils.GetAllPropertySets(p).ToList();
+                foreach (var ps in psets)
                 {
                     var name = ps.Name?.ToString();
                     if (string.IsNullOrWhiteSpace(name)) continue;
 
-                    Increment(report.ClassToPsets, ifcClass, name!);
+                    Increment(report.ClassToPsets, ifcClass, name);
 
                     var keys = ps.HasProperties
                         .Select(prop => prop.Name.ToString())
                         .Where(k => !string.IsNullOrWhiteSpace(k))
                         .Select(k => k!);
+                    
+                    AddMany(report.PsetToPropertyKeys, name, keys);
+                }
+                
+                // Qtos
+                var qtos = IfcPropertyUtils.GetAllQuantitySets(p).ToList();
+                foreach (var q in qtos)
+                {
+                    var name = q.Name.ToString();
+                    if (string.IsNullOrWhiteSpace(name)) continue;
 
-                    AddMany(report.PsetToPropertyKeys, name!, keys);
+                    Increment(report.ClassToQtos, ifcClass, name);
+
+                    var qNames = q.Quantities
+                        .Select(qty => qty.Name.ToString())
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .Select(n => n!);
+                    
+                    AddMany(report.QtoToQuantityNames, name, qNames);
                 }
             }
 

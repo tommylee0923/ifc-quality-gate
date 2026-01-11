@@ -6,6 +6,7 @@ using Xbim.Ifc;
 using Xbim.Common;
 using Xbim.Ifc4.Interfaces;
 using IfcQa.Core.Rules;
+using Ifc.Qa.Rules;
 
 namespace IfcQa.Core;
 
@@ -89,11 +90,13 @@ public sealed class IfcAnalyzer
                 new RuleRequirePsetPropertyValueBool("W302", Severity.Warning, "IfcWall", "Pset_WallCommon", "LoadBearing"),
                 new RuleRequirePsetPropertyValueBool("W301", Severity.Error, "IfcWallStandcardCase", "Pset_WallCommon", "IsExternal"),
                 new RuleRequirePsetPropertyValueBool("W302", Severity.Warning, "IfcWallStandcardCase", "Pset_WallCommon", "LoadBearing"),
+                new RuleRequireQtoQuantityNames("W401", Severity.Warning, "IfcWall", "Qto_WallBaseQuantities", "Length", "NetSideArea"),
 
                 //Slabs
                 new RuleRequirePset("S101", Severity.Error, "IfcSlab", "Pset_SlabCommon"),
                 new RuleRequireQto("S102", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities"),
                 new RuleRequirePsetPropertyValueBool("S301", Severity.Warning, "IfcSlab", "Pset_SlabCommon", "IsExternal"),
+                new RuleRequireQtoQuantityNames("S401", Severity.Warning, "IfcSlab", "Qto_SlabBaseQuantities", "NetArea"),
 
                 //Roof
                 new RuleRequirePset("R101", Severity.Warning, "IfcRoof", "Pset_RoofCommon"),
@@ -102,6 +105,9 @@ public sealed class IfcAnalyzer
                 //Spaces
                 new RuleRequirePset("SP101", Severity.Warning, "IfcSpace", "Pset_SpaceCommon"),
                 new RuleRequirePsetPropertyKeys("SP201", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "NetPlannedArea"),
+                new RuleRequiredPsetPropertyValueNumber("SP301", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "NetPlannedArea", 0),
+                new RuleRequiredPsetPropertyValueNumber("SP302", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "GrossPlannedArea", 0),
+                new RuleComparePsetNumbers("SP303", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "GrossPlannedArea", "NetPlannedArea"),
 
                 //Building
                 new RuleRequirePset("B101", Severity.Info, "IfcBuilding", "Pset_BuildingCommon"),

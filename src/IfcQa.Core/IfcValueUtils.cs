@@ -55,12 +55,33 @@ namespace IfcQa.Core
 
         public static double? GetSingleValueAsDouble(IIfcProperty prop)
         {
-            var s = GetSingleValueAsString(prop);
-            if (string.IsNullOrWhiteSpace(s)) return null;
+            if (prop is not IIfcPropertySingleValue sv) return null;
 
-            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var d))
+            var nv = sv.NominalValue;
+            if (nv == null) return null;
+
+            var s = nv.ToString()?.Trim();
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                s = s.Replace("m2", "", StringComparison.OrdinalIgnoreCase).Trim();
+
+                if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var d))
                 return d;
+            }
 
+            var valueProp = nv.GetType().GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+            if (valueProp != null)
+            {
+                var val = valueProp.GetValue(nv);
+                if (val is double dd) return dd;
+                if (val is float ff) return ff;
+                if (val is int i) return i;
+
+                var vs = val?.ToString()?.Trim();
+                if (!string.IsNullOrWhiteSpace(vs) && 
+                    double.TryParse(vs, NumberStyles.Any, CultureInfo.InvariantCulture, out var dv)) return dv;
+            }
+            
             return null;
         }
     }
