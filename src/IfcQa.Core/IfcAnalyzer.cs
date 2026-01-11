@@ -8,6 +8,7 @@ using Xbim.Ifc4.Interfaces;
 using IfcQa.Core.Rules;
 using Ifc.Qa.Rules;
 using System.Xml.Schema;
+using IfcQa.Core.Rule;
 
 namespace IfcQa.Core;
 
@@ -112,6 +113,7 @@ public sealed class IfcAnalyzer
                 new RuleRequiredPsetPropertyValueNumber("SP301", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "NetPlannedArea", 0),
                 new RuleRequiredPsetPropertyValueNumber("SP302", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "GrossPlannedArea", 0),
                 new RuleComparePsetNumbers("SP303", Severity.Warning, "IfcSpace", "Pset_SpaceCommon", "GrossPlannedArea", "NetPlannedArea"),
+                new RuleSpaceExternalHasExternalBoundary(),
 
                 //Building
                 new RuleRequirePset("B101", Severity.Info, "IfcBuilding", "Pset_BuildingCommon"),
