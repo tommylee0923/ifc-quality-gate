@@ -101,6 +101,9 @@ Summary metadata including:
 - Per-rule issue counts
 - Unique elements affected
 
+report.html
+-----------
+- Open out/report.html in a browser
 
 ## Exit Codes (Quality Gate)
 ------------------------

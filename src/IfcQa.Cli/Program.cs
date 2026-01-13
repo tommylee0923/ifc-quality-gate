@@ -39,6 +39,7 @@ rulesetPath = Path.GetFullPath(rulesetPath);
 
 var outDir = GetOption(args, "--out", "out");
 outDir = Path.GetFullPath(outDir);
+var reportHtmlPath = Path.Combine(outDir, "report.html");
 
 Directory.CreateDirectory(outDir);
 
@@ -71,6 +72,11 @@ if (cmd == "check")
 
         var analyzer = new IfcAnalyzer();
         var run = analyzer.AnalyzeWithRules(ifcPath, rules);
+
+        var html = HtmlReportWriter.Build(run, specs.Name, specs.Version);
+        File.WriteAllText(reportHtmlPath, html);
+        Console.WriteLine("Wrote report.html");
+
         var byRule = run.Issues
             .GroupBy(i => i.RuleId)
             .Select(g => new
