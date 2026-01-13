@@ -42,9 +42,9 @@ Generate a catalog of available Psets and Qtos:
 Rules are defined in JSON files and loaded at runtime.
 
 Each ruleset contains:
-- name        Human-readable name
-- version     Ruleset version
-- rules[]     List of rule definitions
+- `name`        Human-readable name
+- `version`     Ruleset version
+- `rules[]`     List of rule definitions
 
 Example (simplified):
 
@@ -103,29 +103,29 @@ Summary metadata including:
 
 ## Exit Codes (Quality Gate)
 ------------------------
-The CLI can act as a quality gate using --fail-on.
+The CLI can act as a quality gate using `--fail-on`.
 
 Default behavior:
 - Fails only on Error
 
 Examples:
-
+````bash
   IfcQa.Cli check model.ifc
     -> exit 0 if no Errors
 
   IfcQa.Cli check model.ifc --fail-on Warning
     -> exit 1 if any Warning or Error exists
-
+````
 Supported values:
-- Error   (default)
-- Warning
-- Info
-- None
+- `Error`   (default)
+- `Warning`
+- `Info`
+- `None`
 
 Exit codes:
-- 0 = pass
-- 1 = quality gate failed
-- 2 = invalid ruleset or input error
+- `0` = pass
+- `1` = quality gate failed
+- `2` = invalid ruleset or input error
 
 
 ## Roadmap
