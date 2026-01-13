@@ -47,7 +47,7 @@ Each ruleset contains:
 - `rules[]`     List of rule definitions
 
 Example (simplified):
-
+````bash
 {
   "name": "Basic IFC QA",
   "version": "0.2.0",
@@ -64,6 +64,7 @@ Example (simplified):
     }
   ]
 }
+````
 
 Rulesets are validated on load:
 - Duplicate rule IDs cause failure
