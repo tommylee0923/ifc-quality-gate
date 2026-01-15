@@ -9,6 +9,10 @@ public sealed class RuleSpec
     public string? IfcClass {get; set;}
     public string? Pset {get; set;}
     public string[]? Psets {get; set;}
+    
+    public string? PsetA {get; set;}
+    
+    public string? PsetB {get; set;}
     public string? Key {get; set;}
     public string? KeyA {get; set;}
     public string? KeyB {get; set;}
