@@ -42,7 +42,7 @@ public static class RuleFactory
                     Req(s.Pset, "pset", s),
                     Req(s.Key, "key", s)
                 ),
-            
+
             "AllowedValues" =>
                 new RuleAllowedValues(
                     s.Id,
@@ -57,15 +57,15 @@ public static class RuleFactory
                 new RuleRequirePset(
                     s.Id,
                     sev,
-                    Req(s.IfcClass, "ifcClass", s), 
+                    Req(s.IfcClass, "ifcClass", s),
                     Req(s.Pset, "pset", s)),
-            
+
             "RequireAnyPset" =>
                 new RuleRequireAnyPset(
                     s.Id,
                     sev,
                     Req(s.IfcClass, "ifcClass", s),
-                    ReqArr(s.Psets, "psets",s)
+                    ReqArr(s.Psets, "psets", s)
                 ),
 
             "RequirePsetPropertyKey" =>
@@ -82,7 +82,7 @@ public static class RuleFactory
                     Req(s.IfcClass, "ifcClass", s),
                     Req(s.Pset, "pset", s),
                     Req(s.Key, "key", s)),
-            
+
             "RequirePsetNumber" =>
                 new RuleRequirePsetPropertyValueNumber(
                     s.Id, sev,
@@ -134,6 +134,15 @@ public static class RuleFactory
                     s.Id,
                     sev),
 
+            "SurveyValue" => // Use this to survey values
+                new RuleSurveyValue(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.Pset, "pset", s),
+                    Req(s.Key, "key", s)
+                ),
+
             _ => throw new RulesetValidationException($"Unknown rule type: {s.Type}")
         };
     }
@@ -145,11 +154,11 @@ public static class RuleFactory
         return v;
     }
     static string[] ReqArr(string[]? v, string field, RuleSpec s)
-{
-    if (v == null || v.Length == 0)
-        throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field '{field}'.");
-    return v;
-}
+    {
+        if (v == null || v.Length == 0)
+            throw new RulesetValidationException($"Rule '{s.Id}' (type '{s.Type}') missing required field '{field}'.");
+        return v;
+    }
 
     static double ReqDouble(double? v, string field, RuleSpec s)
     {
