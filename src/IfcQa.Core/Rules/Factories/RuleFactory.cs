@@ -142,6 +142,17 @@ public static class RuleFactory
                     Req(s.Pset, "pset", s),
                     Req(s.Key, "key", s)
                 ),
+            
+            "RequireEqualStrings" =>
+                new RuleRequireEqualStrings(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.PsetA, "psetA", s),
+                    Req(s.KeyA, "keyA", s),
+                    Req(s.PsetB, "psetB", s),
+                    Req(s.KeyB, "keyB", s)
+                ),
 
             _ => throw new RulesetValidationException($"Unknown rule type: {s.Type}")
         };

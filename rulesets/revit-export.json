@@ -93,6 +93,26 @@
                 "New Construction",
                 "Existing"
             ]
+        },
+        {
+            "type": "RequireEqualStrings",
+            "id": "RV-PHASE-CONSIST-001",
+            "severity": "Info",
+            "ifcClass": "IfcDoor",
+            "psetA": "PSet_Revit_Identity Data",
+            "keyA": "Scheduled",
+            "psetB": "PSet_Revit_Phasing",
+            "keyB": "Phase Created"
+        },
+        {
+            "type": "RequireEqualStrings",
+            "id": "RV-PHASE-CONSIST-002",
+            "severity": "Info",
+            "ifcClass": "IfcWindow",
+            "psetA": "PSet_Revit_Identity Data",
+            "keyA": "Scheduled",
+            "psetB": "PSet_Revit_Phasing",
+            "keyB": "Phase Created"
         }
     ]
 }
