@@ -61,6 +61,27 @@ namespace IfcQa.Core
             .Select(r => r.RelatingPropertyDefinition)
             .OfType<IIfcElementQuantity>();
 
+        public static IEnumerable<IIfcPropertySet> GetInstancePropertySets(IIfcProduct p)
+        {
+            return p.IsDefinedBy
+                .OfType<IIfcRelDefinesByProperties>()
+                .Select(r => r.RelatingPropertyDefinition)
+                .OfType<IIfcPropertySet>();
+        }
+
+        public static IEnumerable<IIfcPropertySet> GetTypePropertySets(IIfcProduct p)
+        {
+            var typeObj = p.IsTypedBy
+                .OfType<IIfcRelDefinesByType>()
+                .Select(r => r.RelatingType)
+                .FirstOrDefault();
+            
+            if (typeObj?.HasPropertySets == null)
+                return Enumerable.Empty<IIfcPropertySet>();
+            
+            return typeObj.HasPropertySets.OfType<IIfcPropertySet>();
+        }
+
         public static bool HasAnyPset(IIfcProduct p) => GetPropertySets(p).Any();
         public static bool HasAnyQto(IIfcProduct p) => GetQuantitySets(p).Any();
         public static bool HasPset(IIfcProduct p, string psetName) =>

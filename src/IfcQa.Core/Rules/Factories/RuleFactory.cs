@@ -177,6 +177,28 @@ public static class RuleFactory
                     Req(s.KeyB, "keyB", s),
                     s.SkipIfMissing
                 ),
+            
+            "RegexMatch" =>
+                new RuleRegexMatch(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    s.Attribute,
+                    s.Pset,
+                    s.Key,
+                    Req(s.Regex, "regex", s),
+                    s.SkipIfMissing
+                ),
+            
+            "RequireInstanceEqualsType" =>
+                new RuleRequireInstanceEqualsType(
+                    s.Id,
+                    sev,
+                    Req(s.IfcClass, "ifcClass", s),
+                    Req(s.PsetB, "pset", s),
+                    Req(s.KeyB, "key", s),
+                    s.SkipIfMissing
+                ),
 
 
             _ => throw new RulesetValidationException($"Unknown rule type: {s.Type}")

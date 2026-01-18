@@ -129,6 +129,24 @@
             "keyA": "Mark",
             "psetB": "PSet_Revit_Type_Identity Data",
             "keyB": "Type Mark"
+        },
+        {
+            "type": "RegexMatch",
+            "id": "IFC-SPACE-NAME-REGEX-001",
+            "severity": "Info",
+            "ifcClass": "IfcSpace",
+            "attribute": "Name",
+            "regex": "^[A-Za-z0-9 _-]{2,}$",
+            "skipIfMissing": false
+        },
+        {
+            "type": "RequireInstanceEqualsType",
+            "id": "RV-DOOR-COMMENTS-TYPECONSIST-001",
+            "severity": "Info",
+            "ifcClass": "IfcDoor",
+            "pset": "PSet_Revit_Identity Data",
+            "key": "Comments",
+            "skipIfMissing": true
         }
     ]
 }
