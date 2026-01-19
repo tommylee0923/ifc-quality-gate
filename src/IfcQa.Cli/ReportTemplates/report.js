@@ -19,6 +19,9 @@ const fGroup = document.getElementById("fGroup");
 const rulesetFile = document.getElementById("rulesetFile");
 const rows = document.getElementById("rows");
 const shown = document.getElementById("shown");
+const btnExportCsv = document.getElementById("btnExportCsv");
+const btnCopyLink = document.getElementById("btnCopyLink");
+
 
 // drawer
 const drawer = document.getElementById("drawer");
@@ -400,6 +403,7 @@ function render() {
             (a.name || "").localeCompare(b.name || "") ||
             (a.globalId || "").localeCompare(b.globalId || "");
     });
+    window.__currentFiltered = filtered;
 
     shown.textContent = `${filtered.length} shown`;
 
@@ -409,6 +413,7 @@ function render() {
         window.__viewIssues = filtered;   // flat uses direct mapping
         renderFlat(filtered);
     }
+
 }
 
 
@@ -484,4 +489,60 @@ function selectRowByIdx(idx) {
     clearSelectedRow();
     const tr = rows.querySelector(`tr[data-idx="${idx}"]`);
     if (tr) tr.classList.add("selected");
+}
+
+function csvEscape(v) {
+  const s = (v ?? "").toString();
+  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function toCsv(rows) {
+  const header = ["severity","ruleId","ifcClass","globalId","name","message"];
+  const lines = [header.join(",")];
+
+  for (const r of rows) {
+    lines.push([
+      csvEscape(r.severity),
+      csvEscape(r.ruleId),
+      csvEscape(r.ifcClass),
+      csvEscape(r.globalId),
+      csvEscape(r.name),
+      csvEscape(r.message),
+    ].join(","));
+  }
+
+  return lines.join("\n");
+}
+
+if (btnExportCsv) {
+  btnExportCsv.addEventListener("click", () => {
+    const filtered = window.__currentFiltered || [];
+    const csv = toCsv(filtered);
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ifcqa_filtered.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  });
+}
+
+if (btnCopyLink) {
+  btnCopyLink.addEventListener("click", async () => {
+    const url = location.href; // includes #hash
+    try {
+      await navigator.clipboard.writeText(url);
+      btnCopyLink.textContent = "Copied!";
+      setTimeout(() => (btnCopyLink.textContent = "Copy share link"), 800);
+    } catch {
+      prompt("Copy link:", url);
+    }
+  });
 }
