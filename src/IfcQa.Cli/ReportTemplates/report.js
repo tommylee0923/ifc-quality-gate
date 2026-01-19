@@ -56,7 +56,7 @@ function addOptions(select, label, values) {
     });
 }
 
-addOptions(fSeverity, "Severity (All)", uniq(issues.map((i) => i.severity)));
+addOptions(fSeverity, "Severity (All)", ["Error", "Warning", "Info"]);
 addOptions(fRule, "RuleId (All)", uniq(issues.map((i) => i.ruleId)));
 addOptions(fClass, "IfcClass (All)", uniq(issues.map((i) => i.ifcClass)));
 
@@ -122,6 +122,8 @@ function closeDrawer() {
     drawer.classList.add("hidden");
     drawer.setAttribute("aria-hidden", "true");
     currentIssue = null;
+    clearSelectedRow();
+
 }
 
 dClose.addEventListener("click", closeDrawer);
@@ -162,6 +164,8 @@ rows.addEventListener("click", async (e) => {
     if (tr) {
         const idx = Number(tr.dataset.idx);
         const issue = window.__viewIssues?.[idx];
+        selectRowByIdx(idx);
+        openDrawer(issue);
         if (issue) openDrawer(issue);
     }
 });
@@ -326,31 +330,60 @@ function renderGrouped(filtered) {
 
 
 function render() {
-  const filtered = issues.filter(matches);
+    const filtered = issues.filter(matches);
 
-  filtered.sort((a, b) => {
-    const ra = severityRank(a.severity);
-    const rb = severityRank(b.severity);
-    if (ra !== rb) return ra - rb;
-    return (a.ruleId || "").localeCompare(b.ruleId || "") ||
-      (a.ifcClass || "").localeCompare(b.ifcClass || "") ||
-      (a.name || "").localeCompare(b.name || "") ||
-      (a.globalId || "").localeCompare(b.globalId || "");
-  });
+    filtered.sort((a, b) => {
+        const ra = severityRank(a.severity);
+        const rb = severityRank(b.severity);
+        if (ra !== rb) return ra - rb;
+        return (a.ruleId || "").localeCompare(b.ruleId || "") ||
+            (a.ifcClass || "").localeCompare(b.ifcClass || "") ||
+            (a.name || "").localeCompare(b.name || "") ||
+            (a.globalId || "").localeCompare(b.globalId || "");
+    });
 
-  shown.textContent = `${filtered.length} shown`;
+    shown.textContent = `${filtered.length} shown`;
 
-  if (fGroup && fGroup.checked) {
-    renderGrouped(filtered);          // grouped rebuilds __viewIssues internally
-  } else {
-    window.__viewIssues = filtered;   // flat uses direct mapping
-    renderFlat(filtered);
-  }
+    if (fGroup && fGroup.checked) {
+        renderGrouped(filtered);          // grouped rebuilds __viewIssues internally
+    } else {
+        window.__viewIssues = filtered;   // flat uses direct mapping
+        renderFlat(filtered);
+    }
 }
 
 
 // controls wiring
-[fSeverity, fRule, fClass].forEach((s) => s.addEventListener("change", render));
+const sevChips = document.getElementById("sevChips");
+if (sevChips) {
+    sevChips.addEventListener("click", (e) => {
+        const btn = e.target.closest(".chip");
+        if (!btn) return;
+
+        const sev = btn.dataset.sev ?? "";
+        fSeverity.value = sev;
+
+        // update active chip
+        sevChips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+
+        render();
+    });
+}
+// Rule & class dropdowns can stay simple
+[fRule, fClass].forEach((s) => s.addEventListener("change", render));
+
+// Severity dropdown needs to sync chips
+fSeverity.addEventListener("change", () => {
+    if (sevChips) {
+        const v = fSeverity.value || "";
+        sevChips.querySelectorAll(".chip").forEach((c) => {
+            c.classList.toggle("active", (c.dataset.sev ?? "") === v);
+        });
+    }
+    render();
+});
+
 fText.addEventListener("input", render);
 if (fGroup) fGroup.addEventListener("change", render);
 
@@ -382,6 +415,16 @@ if (rulesetFile) {
             console.error(err);
         }
     });
+}
+
+function clearSelectedRow() {
+    rows.querySelectorAll("tr.selected").forEach(el => el.classList.remove("selected"));
+}
+
+function selectRowByIdx(idx) {
+    clearSelectedRow();
+    const tr = rows.querySelector(`tr[data-idx="${idx}"]`);
+    if (tr) tr.classList.add("selected");
 }
 
 render();
