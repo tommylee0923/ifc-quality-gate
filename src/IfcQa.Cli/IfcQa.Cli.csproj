@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IfcQa.Core\IfcQa.Core.csproj" />
+    <None Include="ReportTemplates\**\*.*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
