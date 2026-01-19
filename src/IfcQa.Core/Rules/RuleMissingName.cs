@@ -10,8 +10,8 @@ namespace IfcQa.Core.Rules
 {
     public sealed class RuleMissingName : IRule
     {
-        public string Id {get;}
-        public Severity Severity {get; }
+        public string Id { get; }
+        public Severity Severity { get; }
 
         public RuleMissingName(string id, Severity severity)
         {
@@ -35,6 +35,12 @@ namespace IfcQa.Core.Rules
                         p.GlobalId.ToString() ?? "",
                         name,
                         "Element Name is missing/blank."
+                        )
+                        .WithTrace(
+                            path: "Attribute: Name",
+                            source: ValueSource.Attribute,
+                            expected: "Non-empty",
+                            actual: name
                         );
                 }
             }

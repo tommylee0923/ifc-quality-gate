@@ -56,6 +56,12 @@ public sealed class RuleRequireInstanceEqualsType : IRule
                     p.GlobalId,
                     p.Name,
                     $"Instance '{_pset}.{_key}' = '{instVal}' differs from Type '{_pset}.{_key}' = '{typeVal}'."
+                )
+                .WithTrace(
+                    path: $"Instance:{_pset}.{_key} == Type:{_pset}.{_key}",
+                    source: ValueSource.Derived,
+                    expected: typeVal,
+                    actual: instVal
                 );
             }
         }

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
 using System.Runtime.Serialization;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
@@ -6,8 +8,8 @@ namespace IfcQa.Core.Rules;
 
 public sealed class RuleAllowedValues : IRule
 {
-    public string Id {get;}
-    public Severity Severity {get;}
+    public string Id { get; }
+    public Severity Severity { get; }
 
     private readonly string _ifcClass;
     private readonly string _pset;
@@ -39,7 +41,7 @@ public sealed class RuleAllowedValues : IRule
         var products = model.Instances
             .OfType<IIfcProduct>()
             .Where(p => p.ExpressType?.Name.Equals(_ifcClass, StringComparison.OrdinalIgnoreCase) == true);
-        
+
         foreach (var p in products)
         {
             var psets = IfcPropertyUtils.GetAllPropertySets(p);
@@ -48,14 +50,16 @@ public sealed class RuleAllowedValues : IRule
             if (ps == null)
             {
                 if (_skipIfMissing) continue;
-                yield return new Issue(
-                    Id,
+               yield return IssueTraceExtensions.Missing(
+                    Id, 
                     Severity,
-                    _ifcClass,
-                    p.GlobalId,
+                    _ifcClass, 
+                    p.GlobalId, 
                     p.Name,
-                    $"Missing property set '{_pset}' (required for '{_key}'."
-                );
+                    path: _pset,
+                    source: ValueSource.PsetInstance,
+                    message: $"Missing property set '{_pset}' (required for '{_key}')."
+                    );
                 continue;
             }
 
@@ -63,14 +67,16 @@ public sealed class RuleAllowedValues : IRule
             if (prop == null)
             {
                 if (_skipIfMissing) continue;
-                yield return new Issue(
+                yield return IssueTraceExtensions.Missing(
                     Id,
                     Severity,
                     _ifcClass,
                     p.GlobalId,
                     p.Name,
-                    $"Missing property '{_key}' in '{_pset}'."
-                );
+                    path: _pset,
+                    source: ValueSource.PsetInstance,
+                    message: $"Missing property '{_key}' in '{_pset}'."
+                    );
                 continue;
             }
 
@@ -78,27 +84,31 @@ public sealed class RuleAllowedValues : IRule
             if (string.IsNullOrWhiteSpace(val))
             {
                 if (_skipIfMissing) continue;
-                yield return new Issue(
+                yield return IssueTraceExtensions.InvalidValue(
                     Id,
                     Severity,
                     _ifcClass,
                     p.GlobalId,
                     p.Name,
-                    $"Property '{_pset}.{_key}' must not be empty."
-                );
+                    path: $"{_pset}.{_key}",
+                    source: ValueSource.PsetInstance,
+                    expected: "Non-empty",
+                    actual: val,
+                    message: $"Property '{_pset}.{_key}' must not be empty."
+                    );
                 continue;
             }
 
             if (!_allowed.Contains(val))
             {
-                yield return new Issue(
-                    Id,
-                    Severity,
-                    _ifcClass,
-                    p.GlobalId,
-                    p.Name,
-                    $"Property '{_pset}.{_key}' has value '{val}', expected one of [{string.Join(",", _allowed)}]."
-                );
+                yield return IssueTraceExtensions.InvalidValue(
+                    Id, Severity, _ifcClass, p.GlobalId, p.Name,
+                    path: $"{_pset}.{_key}",
+                    source: ValueSource.PsetInstance,
+                    expected: $"One of: {string.Join(", ", _allowed)}",
+                    actual: val,
+                    message: $"Property '{_pset}.{_key}' has value '{val}', expected one of [{string.Join(",", _allowed)}]."
+                    );
                 continue;
             }
         }

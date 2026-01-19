@@ -60,6 +60,12 @@ public sealed class RuleComparePsetNumbers : IRule
                     p.GlobalId.ToString() ?? "", 
                     p.Name?.ToString(),
                     $"'{_aKey}' ({a}) should be >= '{_bKey}' ({b}) in '{_psetName}'."
+                )
+                .WithTrace(
+                    path: $"{_psetName}.{_aKey} >= {_psetName}.{_bKey}",
+                    source: ValueSource.Derived,
+                    expected: $">= {_bKey}",
+                    actual: $"{_aKey}={a}, {_bKey}={b}"
                 );
             }
         }
