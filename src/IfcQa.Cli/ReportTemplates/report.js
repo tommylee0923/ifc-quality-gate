@@ -38,6 +38,11 @@ const dName = document.getElementById("dName");
 const dMessage = document.getElementById("dMessage");
 const dRuleMeta = document.getElementById("dRuleMeta");
 const dRuleInfo = document.getElementById("dRuleInfo");
+const dPath = document.getElementById("dPath");
+const dSource = document.getElementById("dSource");
+const dExpected = document.getElementById("dExpected");
+const dActual = document.getElementById("dActual");
+
 
 let rulesetMetaByRuleId = {}; // { [ruleId]: { title, why, description } }
 let currentIssue = null;
@@ -152,6 +157,11 @@ function openDrawer(issue) {
     dGlobalId.textContent = issue.globalId || "";
     dName.textContent = issue.name || "";
     dMessage.textContent = issue.message || "";
+    dPath.textContent = issue.path || "";
+    dSource.textContent = issue.source || "";
+    dExpected.textContent = issue.expected || "";
+    dActual.textContent = issue.actual || "";
+
 
     const meta = rulesetMetaByRuleId[issue.ruleId];
     if (meta && (meta.title || meta.why || meta.description)) {
@@ -492,57 +502,57 @@ function selectRowByIdx(idx) {
 }
 
 function csvEscape(v) {
-  const s = (v ?? "").toString();
-  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-  return s;
+    const s = (v ?? "").toString();
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
 }
 
 function toCsv(rows) {
-  const header = ["severity","ruleId","ifcClass","globalId","name","message"];
-  const lines = [header.join(",")];
+    const header = ["severity", "ruleId", "ifcClass", "globalId", "name", "message"];
+    const lines = [header.join(",")];
 
-  for (const r of rows) {
-    lines.push([
-      csvEscape(r.severity),
-      csvEscape(r.ruleId),
-      csvEscape(r.ifcClass),
-      csvEscape(r.globalId),
-      csvEscape(r.name),
-      csvEscape(r.message),
-    ].join(","));
-  }
+    for (const r of rows) {
+        lines.push([
+            csvEscape(r.severity),
+            csvEscape(r.ruleId),
+            csvEscape(r.ifcClass),
+            csvEscape(r.globalId),
+            csvEscape(r.name),
+            csvEscape(r.message),
+        ].join(","));
+    }
 
-  return lines.join("\n");
+    return lines.join("\n");
 }
 
 if (btnExportCsv) {
-  btnExportCsv.addEventListener("click", () => {
-    const filtered = window.__currentFiltered || [];
-    const csv = toCsv(filtered);
+    btnExportCsv.addEventListener("click", () => {
+        const filtered = window.__currentFiltered || [];
+        const csv = toCsv(filtered);
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ifcqa_filtered.csv";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ifcqa_filtered.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
 
-    URL.revokeObjectURL(url);
-  });
+        URL.revokeObjectURL(url);
+    });
 }
 
 if (btnCopyLink) {
-  btnCopyLink.addEventListener("click", async () => {
-    const url = location.href; // includes #hash
-    try {
-      await navigator.clipboard.writeText(url);
-      btnCopyLink.textContent = "Copied!";
-      setTimeout(() => (btnCopyLink.textContent = "Copy share link"), 800);
-    } catch {
-      prompt("Copy link:", url);
-    }
-  });
+    btnCopyLink.addEventListener("click", async () => {
+        const url = location.href; // includes #hash
+        try {
+            await navigator.clipboard.writeText(url);
+            btnCopyLink.textContent = "Copied!";
+            setTimeout(() => (btnCopyLink.textContent = "Copy share link"), 800);
+        } catch {
+            prompt("Copy link:", url);
+        }
+    });
 }

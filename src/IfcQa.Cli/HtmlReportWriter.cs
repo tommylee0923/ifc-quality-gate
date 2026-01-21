@@ -52,9 +52,6 @@ internal static class HtmlReportWriter
             $"ReportTemplates folder not found. Tried:\n- {Path.Combine(baseDir, "ReportTemplates")}\n- {candidate}");
     }
 
-
-
-
     public static string Build(IfcQaRunResult run, string rulesetName, string rulesetVersion)
     {
         var issues = run.Issues ?? new List<Issue>();
@@ -62,6 +59,22 @@ internal static class HtmlReportWriter
         int errors = issues.Count(i => i.Severity == Severity.Error);
         int warnings = issues.Count(i => i.Severity == Severity.Warning);
         int info = issues.Count(i => i.Severity == Severity.Info);
+
+        static int SevRank(Severity s) => s switch
+        {
+            Severity.Error => 0,
+            Severity.Warning => 1,
+            _ => 2
+        };
+
+        issues = issues
+          .OrderBy(i => SevRank(i.Severity))
+          .ThenBy(i => i.RuleId)
+          .ThenBy(i => i.IfcClass)
+          .ThenBy(i => i.Name)
+          .ThenBy(i => i.GlobalId)
+          .ToList();
+
 
         var payload = new
         {
@@ -75,7 +88,11 @@ internal static class HtmlReportWriter
                 ifcClass = i.IfcClass,
                 globalId = i.GlobalId,
                 name = i.Name ?? "",
-                message = i.Message
+                message = i.Message,
+                path = i.Path ?? "",
+                source = i.Source?.ToString() ?? "",
+                expected = i.Expected ?? "",
+                actual = i.Actual ?? ""
             }).ToList()
         };
 
