@@ -257,6 +257,8 @@ tr:hover td {
     word-break: break-word;
 }
 
+#dRuleInfo { white-space: pre-line; }
+
 .mono {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }

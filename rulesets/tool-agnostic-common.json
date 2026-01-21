@@ -1,50 +1,89 @@
 {
   "name": "Tool-agnostic IFC QA (Common Psets)",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "rules": [
     {
       "type": "RequireAnyPset",
       "id": "TA-WALL-001",
       "severity": "Info",
       "ifcClass": "IfcWall",
-      "psets": ["Pset_WallCommon"]
+      "psets": [
+        "Pset_WallCommon"
+      ],
+      "meta": {
+        "title": "IfcWall should include required common property set(s)",
+        "why": "Common Psets carry key attributes used across tools and downstream workflows.",
+        "howToFix": "Ensure the exporter includes Pset_WallCommon for IfcWall."
+      }
     },
     {
       "type": "RequireAnyPset",
       "id": "TA-WALLSC-001",
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
-      "psets": ["Pset_WallCommon"]
+      "psets": [
+        "Pset_WallCommon"
+      ],
+      "meta": {
+        "title": "IfcWallStandardCase should include required common property set(s)",
+        "why": "Common Psets carry key attributes used across tools and downstream workflows.",
+        "howToFix": "Ensure the exporter includes Pset_WallCommon for IfcWallStandardCase."
+      }
     },
     {
       "type": "RequireAnyPset",
       "id": "TA-SLAB-001",
       "severity": "Info",
       "ifcClass": "IfcSlab",
-      "psets": ["Pset_SlabCommon"]
+      "psets": [
+        "Pset_SlabCommon"
+      ],
+      "meta": {
+        "title": "IfcSlab should include required common property set(s)",
+        "why": "Common Psets carry key attributes used across tools and downstream workflows.",
+        "howToFix": "Ensure the exporter includes Pset_SlabCommon for IfcSlab."
+      }
     },
     {
       "type": "RequireAnyPset",
       "id": "TA-DOOR-001",
       "severity": "Info",
       "ifcClass": "IfcDoor",
-      "psets": ["Pset_DoorCommon"]
+      "psets": [
+        "Pset_DoorCommon"
+      ],
+      "meta": {
+        "title": "IfcDoor should include required common property set(s)",
+        "why": "Common Psets carry key attributes used across tools and downstream workflows.",
+        "howToFix": "Ensure the exporter includes Pset_DoorCommon for IfcDoor."
+      }
     },
     {
       "type": "RequireAnyPset",
       "id": "TA-WINDOW-001",
       "severity": "Info",
       "ifcClass": "IfcWindow",
-      "psets": ["Pset_WindowCommon"]
+      "psets": [
+        "Pset_WindowCommon"
+      ],
+      "meta": {
+        "title": "IfcWindow should include required common property set(s)",
+        "why": "Common Psets carry key attributes used across tools and downstream workflows.",
+        "howToFix": "Ensure the exporter includes Pset_WindowCommon for IfcWindow."
+      }
     },
-
     {
       "type": "RequirePsetPropertyKey",
       "id": "TA-WALL-REF-001",
       "severity": "Info",
       "ifcClass": "IfcWall",
       "pset": "Pset_WallCommon",
-      "key": "Reference"
+      "key": "Reference",
+      "meta": {
+        "title": "IfcWall should include Pset_WallCommon.Reference",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate Reference and ensure Pset_WallCommon is exported for IfcWall."
+      }
     },
     {
       "type": "RequirePsetPropertyKey",
@@ -52,7 +91,12 @@
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
       "pset": "Pset_WallCommon",
-      "key": "Reference"
+      "key": "Reference",
+      "meta": {
+        "title": "IfcWallStandardCase should include Pset_WallCommon.Reference",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate Reference and ensure Pset_WallCommon is exported for IfcWallStandardCase."
+      }
     },
     {
       "type": "RequirePsetPropertyKey",
@@ -60,7 +104,12 @@
       "severity": "Info",
       "ifcClass": "IfcSlab",
       "pset": "Pset_SlabCommon",
-      "key": "Reference"
+      "key": "Reference",
+      "meta": {
+        "title": "IfcSlab should include Pset_SlabCommon.Reference",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate Reference and ensure Pset_SlabCommon is exported for IfcSlab."
+      }
     },
     {
       "type": "RequirePsetPropertyKey",
@@ -68,7 +117,12 @@
       "severity": "Info",
       "ifcClass": "IfcDoor",
       "pset": "Pset_DoorCommon",
-      "key": "Reference"
+      "key": "Reference",
+      "meta": {
+        "title": "IfcDoor should include Pset_DoorCommon.Reference",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate Reference and ensure Pset_DoorCommon is exported for IfcDoor."
+      }
     },
     {
       "type": "RequirePsetPropertyKey",
@@ -76,16 +130,25 @@
       "severity": "Info",
       "ifcClass": "IfcWindow",
       "pset": "Pset_WindowCommon",
-      "key": "Reference"
+      "key": "Reference",
+      "meta": {
+        "title": "IfcWindow should include Pset_WindowCommon.Reference",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate Reference and ensure Pset_WindowCommon is exported for IfcWindow."
+      }
     },
-
     {
       "type": "RequirePsetPropertyKey",
       "id": "TA-WALL-BOOL-001",
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
       "pset": "Pset_WallCommon",
-      "key": "IsExternal"
+      "key": "IsExternal",
+      "meta": {
+        "title": "IfcWallStandardCase should include Pset_WallCommon.IsExternal",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate IsExternal and ensure Pset_WallCommon is exported for IfcWallStandardCase."
+      }
     },
     {
       "type": "RequirePsetPropertyKey",
@@ -93,15 +156,26 @@
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
       "pset": "Pset_WallCommon",
-      "key": "LoadBearing"
+      "key": "LoadBearing",
+      "meta": {
+        "title": "IfcWallStandardCase should include Pset_WallCommon.LoadBearing",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate LoadBearing and ensure Pset_WallCommon is exported for IfcWallStandardCase."
+      }
     },
-
     {
       "type": "RequireAnyPset",
       "id": "TA-BLDG-001",
       "severity": "Info",
       "ifcClass": "IfcBuilding",
-      "psets": ["Pset_BuildingCommon"]
+      "psets": [
+        "Pset_BuildingCommon"
+      ],
+      "meta": {
+        "title": "IfcBuilding should include required common property set(s)",
+        "why": "Common Psets carry key attributes used across tools and downstream workflows.",
+        "howToFix": "Ensure the exporter includes Pset_BuildingCommon for IfcBuilding."
+      }
     },
     {
       "type": "RequirePsetPropertyKey",
@@ -109,7 +183,13 @@
       "severity": "Info",
       "ifcClass": "IfcBuilding",
       "pset": "Pset_BuildingCommon",
-      "key": "NumberOfStoreys"
+      "key": "NumberOfStoreys",
+      "meta": {
+        "title": "IfcBuilding should include Pset_BuildingCommon.NumberOfStoreys",
+        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "howToFix": "Populate NumberOfStoreys and ensure Pset_BuildingCommon is exported for IfcBuilding."
+      }
     }
-  ]
+  ],
+  "description": "Baseline IFC checks using common building-element property sets (tool-agnostic)."
 }

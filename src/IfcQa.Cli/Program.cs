@@ -67,13 +67,14 @@ if (cmd == "check")
     try
     {
         var (specs, rules) = RulesetLoader.Load(rulesetPath);
+        var rulesetJsonText = File.ReadAllText(rulesetPath);
 
         Console.WriteLine($"Loaded ruleset {specs.Name} ({specs.Version}), rules: {rules.Length}");
 
         var analyzer = new IfcAnalyzer();
         var run = analyzer.AnalyzeWithRules(ifcPath, rules);
 
-        var html = HtmlReportWriter.Build(run, specs.Name, specs.Version);
+        var html = HtmlReportWriter.Build(run, specs.Name, specs.Version, rulesetJsonText);
         File.WriteAllText(reportHtmlPath, html);
         Console.WriteLine("Wrote report.html");
 

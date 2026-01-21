@@ -45,6 +45,8 @@ const dActual = document.getElementById("dActual");
 
 
 let rulesetMetaByRuleId = {}; // { [ruleId]: { title, why, description } }
+rulesetMetaByRuleId = data.rulesetMeta || {};
+
 let currentIssue = null;
 
 function getStateFromUI() {
@@ -169,7 +171,9 @@ function openDrawer(issue) {
         dRuleInfo.textContent = [
             meta.title ? `Title: ${meta.title}` : "",
             meta.why ? `Why it matters: ${meta.why}` : "",
+            meta.howToFix ? `How to fix: ${meta.howToFix}` : "",
             meta.description ? `Description: ${meta.description}` : "",
+            meta.references && meta.references.length ? `References: ${meta.references.join(", ")}` : "",
         ]
             .filter(Boolean)
             .join("\n");
@@ -470,19 +474,20 @@ if (rulesetFile) {
         try {
             const text = await f.text();
             const rs = JSON.parse(text);
-
-            // Adjust this mapping to your real ruleset schema.
-            // Expected example: rs.rules = [{ id, title, description, whyItMatters }]
             const map = {};
             (rs.rules || []).forEach((r) => {
+                const m = r.meta || {};
                 map[r.id] = {
-                    title: r.title || "",
-                    why: r.whyItMatters || r.why || "",
-                    description: r.description || ""
+                    title: m.title || r.title || "",
+                    why: m.why || r.whyItMatters || r.why || "",
+                    howToFix: m.howToFix || "",
+                    description: r.description || m.description || "",
+                    references: Array.isArray(m.references) ? m.references : []
                 };
             });
 
             rulesetMetaByRuleId = map;
+
             rerenderAndPersist();
         } catch (err) {
             alert("Failed to load ruleset JSON.");
