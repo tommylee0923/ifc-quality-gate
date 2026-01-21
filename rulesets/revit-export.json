@@ -1,208 +1,208 @@
 {
-    "name": "Revit Export QA Pack",
-    "version": "0.2.2",
-    "rules": [
-        {
-            "type": "RequireNonEmpty",
-            "id": "RV-SPACE-NUMBER-001",
-            "severity": "Warning",
-            "ifcClass": "IfcSpace",
-            "pset": "PSet_Revit_Identity Data",
-            "key": "Number",
-            "meta": {
-                "title": "Spaces should have a Number",
-                "why": "Space numbers drive schedules, wayfinding, and coordination.",
-                "howToFix": "Fill the Space/Room Number in the authoring model before export."
-            }
-        },
-        {
-            "type": "RequireNonEmptyAny",
-            "id": "RV-SPACE-NAME-ANY-001",
-            "severity": "Warning",
-            "ifcClass": "IfcSpace",
-            "attribute": "Name",
-            "pset": "PSet_Revit_Identity Data",
-            "key": "Name",
-            "meta": {
-                "title": "Spaces should have a Name (attribute or Identity Data)",
-                "why": "Space names help coordination and downstream reporting.",
-                "howToFix": "Populate the Space/Room Name; ensure it exports to Name or Identity Data."
-            }
-        },
-        {
-            "type": "AllowedValues",
-            "id": "RV-PHASECREATED-ENUM-001",
-            "severity": "Info",
-            "ifcClass": "IfcWall",
-            "pset": "PSet_Revit_Phasing",
-            "key": "Phase Created",
-            "allowedValues": [
-                "New Construction",
-                "Existing"
-            ],
-            "skipIfMissing": true,
-            "meta": {
-                "title": "Phase Created should be a known value",
-                "why": "Consistent phase values reduce ambiguity during QA and handoff.",
-                "howToFix": "Standardize phase names in the authoring model or mapping before export."
-            }
-        },
-        {
-            "type": "AllowedValues",
-            "id": "RV-PHASECREATED-ENUM-002",
-            "severity": "Info",
-            "ifcClass": "IfcDoor",
-            "pset": "PSet_Revit_Phasing",
-            "key": "Phase Created",
-            "allowedValues": [
-                "New Construction",
-                "Existing"
-            ],
-            "skipIfMissing": true,
-            "meta": {
-                "title": "Phase Created should be a known value",
-                "why": "Consistent phase values reduce ambiguity during QA and handoff.",
-                "howToFix": "Standardize phase names in the authoring model or mapping before export."
-            }
-        },
-        {
-            "type": "AllowedValues",
-            "id": "RV-PHASECREATED-ENUM-003",
-            "severity": "Info",
-            "ifcClass": "IfcWindow",
-            "pset": "PSet_Revit_Phasing",
-            "key": "Phase Created",
-            "allowedValues": [
-                "New Construction",
-                "Existing"
-            ],
-            "skipIfMissing": true,
-            "meta": {
-                "title": "Phase Created should be a known value",
-                "why": "Consistent phase values reduce ambiguity during QA and handoff.",
-                "howToFix": "Standardize phase names in the authoring model or mapping before export."
-            }
-        },
-        {
-            "type": "RequireEqualStrings",
-            "id": "RV-PHASE-CONSIST-001",
-            "severity": "Info",
-            "ifcClass": "IfcDoor",
-            "psetA": "PSet_Revit_Identity Data",
-            "keyA": "Scheduled",
-            "psetB": "PSet_Revit_Phasing",
-            "keyB": "Phase Created",
-            "meta": {
-                "title": "Scheduled phase should match Phase Created",
-                "why": "Cross-pset consistency prevents conflicting phasing data.",
-                "howToFix": "Align Identity Data 'Scheduled' with Phasing 'Phase Created' for the element."
-            }
-        },
-        {
-            "type": "RequireEqualStrings",
-            "id": "RV-PHASE-CONSIST-002",
-            "severity": "Info",
-            "ifcClass": "IfcWindow",
-            "psetA": "PSet_Revit_Identity Data",
-            "keyA": "Scheduled",
-            "psetB": "PSet_Revit_Phasing",
-            "keyB": "Phase Created",
-            "meta": {
-                "title": "Scheduled phase should match Phase Created",
-                "why": "Cross-pset consistency prevents conflicting phasing data.",
-                "howToFix": "Align Identity Data 'Scheduled' with Phasing 'Phase Created' for the element."
-            }
-        },
-        {
-            "type": "RequireNonEmptyEither",
-            "id": "RV-DOOR-ID-001",
-            "severity": "Warning",
-            "ifcClass": "IfcDoor",
-            "psetA": "PSet_Revit_Identity Data",
-            "keyA": "Mark",
-            "psetB": "PSet_Revit_Type_Identity Data",
-            "keyB": "Type Mark",
-            "meta": {
-                "title": "Doors should have an ID (Mark or Type Mark)",
-                "why": "Door identification supports schedules, tagging, and issue tracking.",
-                "howToFix": "Set Mark on instances or Type Mark on the door type."
-            }
-        },
-        {
-            "type": "RequireNonEmptyEither",
-            "id": "RV-WINDOW-ID-001",
-            "severity": "Warning",
-            "ifcClass": "IfcWindow",
-            "psetA": "PSet_Revit_Identity Data",
-            "keyA": "Mark",
-            "psetB": "PSet_Revit_Type_Identity Data",
-            "keyB": "Type Mark",
-            "skipIfMissing": true,
-            "meta": {
-                "title": "Windows should have an ID (Mark or Type Mark)",
-                "why": "Window identification supports schedules, tagging, and coordination.",
-                "howToFix": "Set Mark on instances or Type Mark on the window type."
-            }
-        },
-        {
-            "type": "RegexMatch",
-            "id": "IFC-SPACE-NAME-REGEX-001",
-            "severity": "Info",
-            "ifcClass": "IfcSpace",
-            "attribute": "Name",
-            "regex": "^[A-Za-z0-9 _-]{2,}$",
-            "meta": {
-                "title": "Space Name should meet basic naming rules",
-                "why": "Catches blank/garbled names and improves consistency.",
-                "howToFix": "Use alphanumerics with simple separators; avoid special characters."
-            }
-        },
-        {
-            "type": "RegexMatch",
-            "id": "RV-DOOR-MARK-REGEX-001",
-            "severity": "Info",
-            "ifcClass": "IfcDoor",
-            "pset": "PSet_Revit_Identity Data",
-            "key": "Mark",
-            "regex": "^[A-Za-z]*\\d+[A-Za-z0-9_-]*$",
-            "skipIfMissing": true,
-            "meta": {
-                "title": "Door Mark should follow a consistent pattern",
-                "why": "Consistent mark patterns reduce scheduling/tagging errors.",
-                "howToFix": "Adopt a Mark naming convention (e.g., D101, DR-01) and apply it consistently."
-            }
-        },
-        {
-            "type": "RegexMatch",
-            "id": "RV-DOOR-TYPEMARK-REGEX-001",
-            "severity": "Info",
-            "ifcClass": "IfcDoor",
-            "pset": "PSet_Revit_Type_Identity Data",
-            "key": "Type Mark",
-            "regex": "^[A-Za-z]*\\d+[A-Za-z0-9_-]*$",
-            "skipIfMissing": true,
-            "meta": {
-                "title": "Door Type Mark should follow a consistent pattern",
-                "why": "Type marks support type-based scheduling and QA.",
-                "howToFix": "Adopt a Type Mark convention and apply it to door types."
-            }
-        },
-        {
-            "type": "RequireEqualStrings",
-            "id": "RV-DOOR-COMMENTS-CONSIST-001",
-            "severity": "Info",
-            "ifcClass": "IfcDoor",
-            "psetA": "PSet_Revit_Identity Data",
-            "keyA": "Comments",
-            "psetB": "PSet_Revit_Type_Identity Data",
-            "keyB": "Type Comments",
-            "skipIfMissing": true,
-            "meta": {
-                "title": "Door instance Comments should align with Type Comments",
-                "why": "Prevents conflicting notes between instance and type data.",
-                "howToFix": "Keep instance comments empty unless overriding type comments; otherwise sync both."
-            }
-        }
-    ],
-    "description": "Rules tuned for common Revit-to-IFC export patterns (identity/phasing/type fallback, naming/mark conventions)."
+  "name": "Revit Export QA Pack",
+  "version": "0.2.3",
+  "rules": [
+    {
+      "type": "RequireNonEmpty",
+      "id": "RV-SPACE-NUMBER-001",
+      "severity": "Warning",
+      "ifcClass": "IfcSpace",
+      "pset": "PSet_Revit_Identity Data",
+      "key": "Number",
+      "meta": {
+        "title": "Spaces should have a Number",
+        "why": "Space numbers drive schedules, wayfinding, and coordination.",
+        "howToFix": "Fill the Space/Room Number in the authoring model before export."
+      }
+    },
+    {
+      "type": "RequireNonEmptyAny",
+      "id": "RV-SPACE-NAME-ANY-001",
+      "severity": "Warning",
+      "ifcClass": "IfcSpace",
+      "attribute": "Name",
+      "pset": "PSet_Revit_Identity Data",
+      "key": "Name",
+      "meta": {
+        "title": "Spaces should have a Name (attribute or Identity Data)",
+        "why": "Space names help coordination and downstream reporting.",
+        "howToFix": "Populate the Space/Room Name; ensure it exports to Name or Identity Data."
+      }
+    },
+    {
+      "type": "AllowedValues",
+      "id": "RV-PHASECREATED-ENUM-001",
+      "severity": "Info",
+      "ifcClass": "IfcWall",
+      "pset": "PSet_Revit_Phasing",
+      "key": "Phase Created",
+      "allowedValues": [
+        "New Construction",
+        "Existing"
+      ],
+      "skipIfMissing": true,
+      "meta": {
+        "title": "Phase Created should be a known value",
+        "why": "Consistent phase values reduce ambiguity during QA and handoff.",
+        "howToFix": "Standardize phase names in the authoring model or mapping before export."
+      }
+    },
+    {
+      "type": "AllowedValues",
+      "id": "RV-PHASECREATED-ENUM-002",
+      "severity": "Info",
+      "ifcClass": "IfcDoor",
+      "pset": "PSet_Revit_Phasing",
+      "key": "Phase Created",
+      "allowedValues": [
+        "New Construction",
+        "Existing"
+      ],
+      "skipIfMissing": true,
+      "meta": {
+        "title": "Phase Created should be a known value",
+        "why": "Consistent phase values reduce ambiguity during QA and handoff.",
+        "howToFix": "Standardize phase names in the authoring model or mapping before export."
+      }
+    },
+    {
+      "type": "AllowedValues",
+      "id": "RV-PHASECREATED-ENUM-003",
+      "severity": "Info",
+      "ifcClass": "IfcWindow",
+      "pset": "PSet_Revit_Phasing",
+      "key": "Phase Created",
+      "allowedValues": [
+        "New Construction",
+        "Existing"
+      ],
+      "skipIfMissing": true,
+      "meta": {
+        "title": "Phase Created should be a known value",
+        "why": "Consistent phase values reduce ambiguity during QA and handoff.",
+        "howToFix": "Standardize phase names in the authoring model or mapping before export."
+      }
+    },
+    {
+      "type": "RequireEqualStrings",
+      "id": "RV-PHASE-CONSIST-001",
+      "severity": "Info",
+      "ifcClass": "IfcDoor",
+      "psetA": "PSet_Revit_Identity Data",
+      "keyA": "Scheduled",
+      "psetB": "PSet_Revit_Phasing",
+      "keyB": "Phase Created",
+      "meta": {
+        "title": "Scheduled phase should match Phase Created",
+        "why": "Cross-pset consistency prevents conflicting phasing data.",
+        "howToFix": "Align Identity Data 'Scheduled' with Phasing 'Phase Created' for the element."
+      }
+    },
+    {
+      "type": "RequireEqualStrings",
+      "id": "RV-PHASE-CONSIST-002",
+      "severity": "Info",
+      "ifcClass": "IfcWindow",
+      "psetA": "PSet_Revit_Identity Data",
+      "keyA": "Scheduled",
+      "psetB": "PSet_Revit_Phasing",
+      "keyB": "Phase Created",
+      "meta": {
+        "title": "Scheduled phase should match Phase Created",
+        "why": "Cross-pset consistency prevents conflicting phasing data.",
+        "howToFix": "Align Identity Data 'Scheduled' with Phasing 'Phase Created' for the element."
+      }
+    },
+    {
+      "type": "RequireNonEmptyEither",
+      "id": "RV-DOOR-ID-001",
+      "severity": "Warning",
+      "ifcClass": "IfcDoor",
+      "psetA": "PSet_Revit_Identity Data",
+      "keyA": "Mark",
+      "psetB": "PSet_Revit_Type_Identity Data",
+      "keyB": "Type Mark",
+      "meta": {
+        "title": "Doors should have an ID (Mark or Type Mark)",
+        "why": "Door identification supports schedules, tagging, and issue tracking.",
+        "howToFix": "Set Mark on instances or Type Mark on the door type."
+      }
+    },
+    {
+      "type": "RequireNonEmptyEither",
+      "id": "RV-WINDOW-ID-001",
+      "severity": "Warning",
+      "ifcClass": "IfcWindow",
+      "psetA": "PSet_Revit_Identity Data",
+      "keyA": "Mark",
+      "psetB": "PSet_Revit_Type_Identity Data",
+      "keyB": "Type Mark",
+      "skipIfMissing": true,
+      "meta": {
+        "title": "Windows should have an ID (Mark or Type Mark)",
+        "why": "Window identification supports schedules, tagging, and coordination.",
+        "howToFix": "Set Mark on instances or Type Mark on the window type."
+      }
+    },
+    {
+      "type": "RegexMatch",
+      "id": "RV-SPACE-NAME-REGEX-001",
+      "severity": "Info",
+      "ifcClass": "IfcSpace",
+      "attribute": "Name",
+      "regex": "^[A-Za-z0-9 _-]{2,}$",
+      "meta": {
+        "title": "Space Name should meet basic naming rules",
+        "why": "Catches blank/garbled names and improves consistency.",
+        "howToFix": "Use alphanumerics with simple separators; avoid special characters."
+      }
+    },
+    {
+      "type": "RegexMatch",
+      "id": "RV-DOOR-MARK-REGEX-001",
+      "severity": "Info",
+      "ifcClass": "IfcDoor",
+      "pset": "PSet_Revit_Identity Data",
+      "key": "Mark",
+      "regex": "^[A-Za-z]*\\d+[A-Za-z0-9_-]*$",
+      "skipIfMissing": true,
+      "meta": {
+        "title": "Door Mark should follow a consistent pattern",
+        "why": "Consistent mark patterns reduce scheduling/tagging errors.",
+        "howToFix": "Adopt a Mark naming convention (e.g., D101, DR-01) and apply it consistently."
+      }
+    },
+    {
+      "type": "RegexMatch",
+      "id": "RV-DOOR-TYPEMARK-REGEX-001",
+      "severity": "Info",
+      "ifcClass": "IfcDoor",
+      "pset": "PSet_Revit_Type_Identity Data",
+      "key": "Type Mark",
+      "regex": "^[A-Za-z]*\\d+[A-Za-z0-9_-]*$",
+      "skipIfMissing": true,
+      "meta": {
+        "title": "Door Type Mark should follow a consistent pattern",
+        "why": "Type marks support type-based scheduling and QA.",
+        "howToFix": "Adopt a Type Mark convention and apply it to door types."
+      }
+    },
+    {
+      "type": "RequireEqualStrings",
+      "id": "RV-DOOR-COMMENTS-CONSIST-001",
+      "severity": "Info",
+      "ifcClass": "IfcDoor",
+      "psetA": "PSet_Revit_Identity Data",
+      "keyA": "Comments",
+      "psetB": "PSet_Revit_Type_Identity Data",
+      "keyB": "Type Comments",
+      "skipIfMissing": true,
+      "meta": {
+        "title": "Door instance Comments should align with Type Comments",
+        "why": "Prevents conflicting notes between instance and type data.",
+        "howToFix": "Keep instance comments empty unless overriding type comments; otherwise sync both."
+      }
+    }
+  ],
+  "description": "Rules tuned for common Revit-to-IFC export patterns (identity/phasing/type fallback, naming/mark conventions). Rule IDs use the 'RV-' prefix for Revit export checks."
 }

@@ -1,3 +1,5 @@
+let activeRuleIds = null;
+
 const data = JSON.parse(document.getElementById("data").textContent);
 const issues = data.issues || [];
 
@@ -21,6 +23,7 @@ const rows = document.getElementById("rows");
 const shown = document.getElementById("shown");
 const btnExportCsv = document.getElementById("btnExportCsv");
 const btnCopyLink = document.getElementById("btnCopyLink");
+const btnClearRuleset = document.getElementById("btnClearRuleset");
 
 
 // drawer
@@ -130,6 +133,8 @@ function severityRank(sev) {
 }
 
 function matches(issue) {
+    if (activeRuleIds && !activeRuleIds.has(issue.ruleId)) return false;
+
     const sev = fSeverity.value;
     const rule = fRule.value;
     const cls = fClass.value;
@@ -474,6 +479,8 @@ if (rulesetFile) {
         try {
             const text = await f.text();
             const rs = JSON.parse(text);
+            activeRuleIds = new Set((rs.rules || []).map(r => r.id));
+            setRulesetActive(true);
             const map = {};
             (rs.rules || []).forEach((r) => {
                 const m = r.meta || {};
@@ -560,4 +567,19 @@ if (btnCopyLink) {
             prompt("Copy link:", url);
         }
     });
+}
+
+function setRulesetActive(isActive) {
+  if (!btnClearRuleset) return;
+  btnClearRuleset.classList.toggle("hidden", !isActive);
+}
+
+if (btnClearRuleset) {
+  btnClearRuleset.addEventListener("click", () => {
+    activeRuleIds = null;
+    // restore meta back to embedded pack (if you want)
+    rulesetMetaByRuleId = data.rulesetMeta || {};
+    setRulesetActive(false);
+    rerenderAndPersist();
+  });
 }

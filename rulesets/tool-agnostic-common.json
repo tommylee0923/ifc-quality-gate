@@ -1,10 +1,10 @@
 {
   "name": "Tool-agnostic IFC QA (Common Psets)",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "rules": [
     {
       "type": "RequireAnyPset",
-      "id": "TA-WALL-001",
+      "id": "CORE-WALL-001",
       "severity": "Info",
       "ifcClass": "IfcWall",
       "psets": [
@@ -18,7 +18,7 @@
     },
     {
       "type": "RequireAnyPset",
-      "id": "TA-WALLSC-001",
+      "id": "CORE-WALLSC-001",
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
       "psets": [
@@ -32,7 +32,7 @@
     },
     {
       "type": "RequireAnyPset",
-      "id": "TA-SLAB-001",
+      "id": "CORE-SLAB-001",
       "severity": "Info",
       "ifcClass": "IfcSlab",
       "psets": [
@@ -46,7 +46,7 @@
     },
     {
       "type": "RequireAnyPset",
-      "id": "TA-DOOR-001",
+      "id": "CORE-DOOR-001",
       "severity": "Info",
       "ifcClass": "IfcDoor",
       "psets": [
@@ -60,7 +60,7 @@
     },
     {
       "type": "RequireAnyPset",
-      "id": "TA-WINDOW-001",
+      "id": "CORE-WINDOW-001",
       "severity": "Info",
       "ifcClass": "IfcWindow",
       "psets": [
@@ -74,98 +74,98 @@
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-WALL-REF-001",
+      "id": "CORE-WALL-REF-001",
       "severity": "Info",
       "ifcClass": "IfcWall",
       "pset": "Pset_WallCommon",
       "key": "Reference",
       "meta": {
         "title": "IfcWall should include Pset_WallCommon.Reference",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate Reference and ensure Pset_WallCommon is exported for IfcWall."
       }
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-WALLSC-REF-001",
+      "id": "CORE-WALLSC-REF-001",
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
       "pset": "Pset_WallCommon",
       "key": "Reference",
       "meta": {
         "title": "IfcWallStandardCase should include Pset_WallCommon.Reference",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate Reference and ensure Pset_WallCommon is exported for IfcWallStandardCase."
       }
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-SLAB-REF-001",
+      "id": "CORE-SLAB-REF-001",
       "severity": "Info",
       "ifcClass": "IfcSlab",
       "pset": "Pset_SlabCommon",
       "key": "Reference",
       "meta": {
         "title": "IfcSlab should include Pset_SlabCommon.Reference",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate Reference and ensure Pset_SlabCommon is exported for IfcSlab."
       }
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-DOOR-REF-001",
+      "id": "CORE-DOOR-REF-001",
       "severity": "Info",
       "ifcClass": "IfcDoor",
       "pset": "Pset_DoorCommon",
       "key": "Reference",
       "meta": {
         "title": "IfcDoor should include Pset_DoorCommon.Reference",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate Reference and ensure Pset_DoorCommon is exported for IfcDoor."
       }
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-WINDOW-REF-001",
+      "id": "CORE-WINDOW-REF-001",
       "severity": "Info",
       "ifcClass": "IfcWindow",
       "pset": "Pset_WindowCommon",
       "key": "Reference",
       "meta": {
         "title": "IfcWindow should include Pset_WindowCommon.Reference",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate Reference and ensure Pset_WindowCommon is exported for IfcWindow."
       }
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-WALL-BOOL-001",
+      "id": "CORE-WALL-BOOL-001",
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
       "pset": "Pset_WallCommon",
       "key": "IsExternal",
       "meta": {
         "title": "IfcWallStandardCase should include Pset_WallCommon.IsExternal",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate IsExternal and ensure Pset_WallCommon is exported for IfcWallStandardCase."
       }
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-WALL-BOOL-002",
+      "id": "CORE-WALL-BOOL-002",
       "severity": "Info",
       "ifcClass": "IfcWallStandardCase",
       "pset": "Pset_WallCommon",
       "key": "LoadBearing",
       "meta": {
         "title": "IfcWallStandardCase should include Pset_WallCommon.LoadBearing",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate LoadBearing and ensure Pset_WallCommon is exported for IfcWallStandardCase."
       }
     },
     {
       "type": "RequireAnyPset",
-      "id": "TA-BLDG-001",
+      "id": "CORE-BLDG-001",
       "severity": "Info",
       "ifcClass": "IfcBuilding",
       "psets": [
@@ -179,17 +179,17 @@
     },
     {
       "type": "RequirePsetPropertyKey",
-      "id": "TA-BLDG-STOREYS-001",
+      "id": "CORE-BLDG-STOREYS-001",
       "severity": "Info",
       "ifcClass": "IfcBuilding",
       "pset": "Pset_BuildingCommon",
       "key": "NumberOfStoreys",
       "meta": {
         "title": "IfcBuilding should include Pset_BuildingCommon.NumberOfStoreys",
-        "why": "Missing keys reduce interoperability and break schedules/filters.",
+        "why": "Missing keys reduce interoperability and can break schedules/filters.",
         "howToFix": "Populate NumberOfStoreys and ensure Pset_BuildingCommon is exported for IfcBuilding."
       }
     }
   ],
-  "description": "Baseline IFC checks using common building-element property sets (tool-agnostic)."
+  "description": "Baseline IFC checks using common building-element property sets (tool-agnostic). Rule IDs use the 'CORE-' prefix for shared checks."
 }
