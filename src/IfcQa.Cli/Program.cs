@@ -207,6 +207,10 @@ static string BuildIssuesCsv(List<Issue> issues)
             Esc(i.IfcClass),
             Esc(i.GlobalId),
             Esc(i.Name),
+            Esc(i.Path),
+            Esc(i.Source.ToString()),
+            Esc(i.Expected),
+            Esc(i.Actual),
             Esc(i.Message)
             ));
     }
