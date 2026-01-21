@@ -31,13 +31,8 @@ if (args.Length < 2)
 
 var ifcPath = args.Length > 1 ? args[1] : throw new ArgumentException("Missing IFC File.");
 
-var failOn = GetOption(args, "--fail-on", "Error");
-var threshold = ParseFailOn(failOn);
 
-var rulesetPath = GetOption(args, "--rules", Path.Combine("rulesets", "basic-ifcqa.json"));
-rulesetPath = Path.GetFullPath(rulesetPath);
-
-var outDir = GetOption(args, "--out", "out");
+var outDir = GetOption(args, new[] { "--out", "-o" }, "out");
 outDir = Path.GetFullPath(outDir);
 var reportHtmlPath = Path.Combine(outDir, "report.html");
 
@@ -56,7 +51,7 @@ if (cmd == "catalog")
     var jsonC = JsonSerializer.Serialize(catalog, JsonOpts());
     File.WriteAllText(catalogJsonPath, jsonC);
     Console.WriteLine($"Wrote {catalogJsonPath}");
-    Console.WriteLine($"Classes:        {catalog.ClassToPsets.Count} (Psets, {catalog.ClassToQtos.Count} (Qtos");
+    Console.WriteLine($"Classes:        {catalog.ClassToPsets.Count} (Psets), {catalog.ClassToQtos.Count} (Qtos)");
     Console.WriteLine($"Unique Psets:   {catalog.PsetToPropertyKeys.Count}");
     Console.WriteLine($"Unique Qtos:    {catalog.QtoToQuantityNames.Count}");
     return;
@@ -66,6 +61,12 @@ if (cmd == "check")
 {
     try
     {
+        var failOn = GetOption(args, new[] { "--fail-on" }, "Error");
+        var threshold = ParseFailOn(failOn);
+
+        var rulesetPath = GetOption(args, new[] { "--rules", "-r" }, Path.Combine("rulesets", "basic-ifcqa.json"));
+        rulesetPath = Path.GetFullPath(rulesetPath);
+
         var (specs, rules) = RulesetLoader.Load(rulesetPath);
         var rulesetJsonText = File.ReadAllText(rulesetPath);
 
@@ -162,8 +163,8 @@ if (cmd == "check")
 static void PrintUsage()
 {
     Console.WriteLine("Usage:");
-    Console.WriteLine(" IfcQa.Cli catalog   <path-to-ifc> [--out <dir>]");
-    Console.WriteLine(" IfcQa.Cli check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir] [--fail-on Error|Warning|Info|None]");
+    Console.WriteLine(" ifcqa catalog   <path-to-ifc> [--out <dir>]");
+    Console.WriteLine(" ifcqa check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir>] [--fail-on Error|Warning|Info|None]");
 }
 
 static JsonSerializerOptions JsonOpts() => new()
@@ -172,11 +173,11 @@ static JsonSerializerOptions JsonOpts() => new()
     Converters = { new JsonStringEnumConverter() }
 };
 
-static string GetOption(string[] args, string name, string defaultValue)
+static string GetOption(string[] args, string[] names, string defaultValue)
 {
-    var idx = Array.FindIndex(args, a => string.Equals(a, name, StringComparison.OrdinalIgnoreCase));
+    var idx = Array.FindIndex(args, a => names.Any(n => string.Equals(a, n, StringComparison.OrdinalIgnoreCase)));
     if (idx < 0) return defaultValue;
-    if (idx + 1 >= args.Length) throw new ArgumentException($"Missing value after {name}");
+    if (idx + 1 >= args.Length) throw new ArgumentException($"Missing value after {args[idx]}");
     return args[idx + 1];
 }
 
@@ -196,7 +197,7 @@ static string BuildIssuesCsv(List<Issue> issues)
     }
 
     var sb = new StringBuilder();
-    sb.AppendLine("RuleId,Severity,IfcClass,GlobalId,Name,Message");
+    sb.AppendLine("RuleId,Severity,IfcClass,GlobalId,Name,Path,Source,Expected,Actual,Message");
 
     foreach (var i in issues)
     {
