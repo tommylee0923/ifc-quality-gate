@@ -16,21 +16,15 @@
 - Validates properties, naming, containment, and consistency
 - Emits structured issues with severity + trace metadata
 
----
-
 ### JSON-Driven Rulesets (Standards-Oriented)
 
 - Portable, tool-agnostic JSON rulesets
 - Supports severity tuning, fallback logic, and noise suppression
 
----
-
 ### Zero-Backend HTML QA Report
 
 - Single, static report.html
 - Summary metrics + filterable issue table
-
----
 
 ### CLI-First, Automation-Friendly
 
