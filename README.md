@@ -4,19 +4,7 @@
 
 ![IfcQA HTML Report](docs/images/report-overview.png)
 
-**IfcQA** is a lightweight, standards-oriented **IFC quality-gate CLI** built in **C# / .NET / xBIM toolkit** , designed to evaluate BIM models against configurable QA rulesets and produce **human-readable, shareable reports**.
-
-The tool aims to be intentionally **tool-agnostic** (no Revit dependency) and suitable for **local QA, CI pipelines, and downstream AEC automation workflows**.
-
----
-
-## Why this exists
-
-IFC (and BIM workflows more broadly) are often seen as complex and difficult to work with.
-
-This project grew out of my own experience in AEC practice, such as many BIM quality issues come down to missing, inconsistent, or poorly structured data, yet diagnosing them usually requires opening specialized tools and digging through models manually.
-
-IfcQA is as an attempt to make those issues easier to detect and explain by turning BIM model quality into clear, human-readable feedback.
+**IfcQA** is a lightweight, standards-oriented **IFC quality-gate CLI** built with **C# / .NET / xBIM toolkit**. It validates BIM models against configurable rulesets and produces clear, shareable QA reports for tool-agnostic workflows, CI pipelines, and automated AEC processes, to make BIM quality issues, such as inconsistent, poorly structured data, easier to detect and explain.
 
 ---
 
@@ -25,43 +13,36 @@ IfcQA is as an attempt to make those issues easier to detect and explain by turn
 ### 1. Rule-based IFC QA Engine
 
 - Modular C# rule system built on xBIM
-- Operates on IFC semantics
-- Supports property presence, consistency, naming, and containment rules
-- Each rule emits structured issues with severity + trace metadata
+- Validates properties, naming, containment, and consistency
+- Emits structured issues with severity + trace metadata
 
 ---
 
 ### 2. JSON-Driven Rulesets (Standards-Oriented)
 
-- Portable JSON rulesets
-- Tool-agnostic baseline + Revit-export-aware pack
+- Portable, tool-agnostic JSON rulesets
 - Supports severity tuning, fallback logic, and noise suppression
-- Mirrors how real BIM QA standards evolve
 
 ---
 
 ### 3. Zero-Backend HTML QA Report
 
-- Single, zero-backend report.html
+- Single, static report.html
 - Summary cards + filterable issue table
-- Group-by-rule view with detailed issue drawer
-- Rule metadata shown inline (why it matters, how to fix, etc.)
 
 ---
 
 ### 4. CLI-First, Automation-Friendly
 
 - Deterministic output (JSON / CSV / HTML)
-- Suitable for local QA, CI pipelines, and automation workflows
+- Designed for local QA, CI pipelines, and automation workflows
 
 ---
 
 ## Tech Stack
 - **Language:** C# (.NET)
-- **IFC Engine:** xBIM
+- **IFC Toolkit:** xBIM
 - **Frontend:** Vanilla HTML / CSS / JS
-- **Architecture:** CLI + static artifacts
-- **Focus:** BIM data quality, IFC semantics, AEC automation
 
 ---
 
