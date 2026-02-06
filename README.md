@@ -4,13 +4,13 @@
 
 ![IfcQA HTML Report](docs/images/report-overview.png)
 
-**IfcQA** is a lightweight, standards-oriented **IFC quality-gate CLI** built with **C# / .NET / xBIM toolkit**. It validates BIM models against configurable rulesets and produces clear, shareable QA reports for tool-agnostic workflows, CI pipelines, and automated AEC processes, to make BIM quality issues, such as inconsistent, poorly structured data, easier to detect and explain.
+**IfcQA** is a lightweight **IFC quality-gate CLI** built with **C# / .NET / xBIM toolkit**. It validates BIM models against configurable rulesets and produces clear, shareable QA reports for tool-agnostic workflows, CI pipelines, and automated AEC processes, making inconsistent or poorly structured BIM data easier to detect and explain.
 
 ---
 
 ## Key Features
 
-### 1. Rule-based IFC QA Engine
+### Rule-based IFC QA Engine
 
 - Modular C# rule system built on xBIM
 - Validates properties, naming, containment, and consistency
@@ -18,17 +18,17 @@
 
 ---
 
-### 2. JSON-Driven Rulesets (Standards-Oriented)
+### JSON-Driven Rulesets (Standards-Oriented)
 
 - Portable, tool-agnostic JSON rulesets
 - Supports severity tuning, fallback logic, and noise suppression
 
 ---
 
-### 3. Zero-Backend HTML QA Report
+### Zero-Backend HTML QA Report
 
 - Single, static report.html
-- Summary cards + filterable issue table
+- Summary metrics + filterable issue table
 
 ---
 
@@ -50,7 +50,7 @@
 
 1)  Download and unzip the Windows release.
 2)  Open PowerShell / Terminal in the extracted folder:
-```bash
+```powershell
 .\ifcqa.exe init -o Demo
 .\ifcqa.exe check path\to\model.ifc -r Demo\rulesets\core\tool-agnostic-common.json -o Demo\out
 ```
