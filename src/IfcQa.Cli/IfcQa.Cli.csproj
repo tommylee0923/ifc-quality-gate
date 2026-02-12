@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <!-- HTML report templates -->
-    <Content Include="ReportTemplates\**\*.*">
+    <Content Include="Report\Templates\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
 

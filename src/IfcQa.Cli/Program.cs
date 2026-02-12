@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using IfcQa.Core;
@@ -35,7 +37,6 @@ var ifcPath = args.Length > 1 ? args[1] : throw new ArgumentException("Missing I
 var outDir = GetOption(args, new[] { "--out", "-o" }, "out");
 outDir = Path.GetFullPath(outDir);
 Directory.CreateDirectory(outDir);
-Directory.CreateDirectory(Path.Combine(outDir, "out"));
 
 var reportHtmlPath = Path.Combine(outDir, "report.html");
 
@@ -49,12 +50,12 @@ if (cmd == "init")
     var baseDir = AppContext.BaseDirectory;
 
     var srcRulesets = Path.Combine(baseDir, "rulesets");
-    var srcTemplates = Path.Combine(baseDir, "ReportTemplates");
+    var srcTemplates = Path.Combine(baseDir, "Report", "Templates");
 
     if (Directory.Exists(srcRulesets))
         CopyDir(Path.Combine(baseDir, "rulesets"), Path.Combine(outDir, "rulesets"));
     if (Directory.Exists(srcTemplates))
-        CopyDir(Path.Combine(baseDir, "ReportTemplates"), Path.Combine(outDir, "ReportTemplates"));
+        CopyDir(Path.Combine(baseDir, "Report", "Templates"), Path.Combine(outDir, "Report", "Templates"));
 
     Console.WriteLine($"Initialized IfcQa project at: {outDir}");
     return;
@@ -78,6 +79,14 @@ if (cmd == "check")
 {
     try
     {
+        var withViewer = HasFlag(args, "--viewer", "--with-viewer");
+        var modelGlbPath = Path.Combine(outDir, "model.glb");
+        bool viewerReady = false;
+        if (withViewer)
+        {
+            viewerReady = TryRunIfcConvertToGlb(ifcPath, modelGlbPath);
+        }
+
         var failOn = GetOption(args, new[] { "--fail-on" }, "Error");
         var threshold = ParseFailOn(failOn);
 
@@ -91,10 +100,18 @@ if (cmd == "check")
 
         var analyzer = new IfcAnalyzer();
         var run = analyzer.AnalyzeWithRules(ifcPath, rules);
-
-        var html = HtmlReportWriter.Build(run, specs.Name, specs.Version, rulesetJsonText);
+        var html = HtmlReportWriter.Build(run, specs.Name, specs.Version, rulesetJsonText, withViewer && viewerReady);
         File.WriteAllText(reportHtmlPath, html);
         Console.WriteLine("Wrote report.html");
+
+        // Copy viewer JS from Report/Templates into output folder
+        var viewerSrc = Path.Combine(AppContext.BaseDirectory, "Report", "Templates", "viewer");
+        var viewerDst = Path.Combine(outDir, "viewer");
+        if (Directory.Exists(viewerSrc))
+        {
+            CopyDir(viewerSrc, viewerDst);
+        }
+
 
         var byRule = run.Issues
             .GroupBy(i => i.RuleId)
@@ -182,7 +199,7 @@ static void PrintUsage()
     Console.WriteLine("Usage:");
     Console.WriteLine(" ifcqa init      [--out <dir> | -o <dir>]");
     Console.WriteLine(" ifcqa catalog   <path-to-ifc> [--out <dir> | -o <dir>]");
-    Console.WriteLine(" ifcqa check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir> | -o <dir>] [--fail-on Error|Warning|Info|None]");
+    Console.WriteLine(" ifcqa check     <path-to-ifc> [--rules <ruleset.json>] [--out <dir> | -o <dir>] [--fail-on Error|Warning|Info|None] [--viewer]");
 }
 
 static JsonSerializerOptions JsonOpts() => new()
@@ -203,7 +220,7 @@ static void CopyDir(string srcDir, string dstDir)
 {
     if (!Directory.Exists(srcDir))
         throw new DirectoryNotFoundException(srcDir);
-    
+
     Directory.CreateDirectory(dstDir);
 
     foreach (var file in Directory.GetFiles(srcDir, "*", SearchOption.AllDirectories))
@@ -252,4 +269,65 @@ static string BuildIssuesCsv(List<Issue> issues)
     return sb.ToString();
 }
 
+static bool HasFlag(string[] args, params string[] names)
+{
+    return args.Any(a => names.Any(n => string.Equals(a, n, StringComparison.OrdinalIgnoreCase)));
+}
+
+static bool TryRunIfcConvertToGlb(string ifcPath, string glbPath)
+{
+    var ifcConvertExe = Environment.GetEnvironmentVariable("IFCQA_IFCCONVERT");
+    if (string.IsNullOrWhiteSpace(ifcConvertExe))
+        ifcConvertExe = "ifcConvert";
+
+    var psi = new System.Diagnostics.ProcessStartInfo
+    {
+        FileName = ifcConvertExe,
+        Arguments = $"--use-element-guids \"{ifcPath}\" \"{glbPath}\"",
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false,
+        CreateNoWindow = true,
+    };
+
+    try
+    {
+        Console.WriteLine("Generating model.glb (this may take a while for large models)...");
+        
+        using var p = System.Diagnostics.Process.Start(psi);
+        if (p == null) return false;
+
+        var stdout = p.StandardOutput.ReadToEnd();
+        var stderr = p.StandardError.ReadToEnd();
+        p.WaitForExit();
+
+        if (p.ExitCode != 0)
+        {
+            Console.WriteLine("IfcConvert failed.");
+            if (!string.IsNullOrWhiteSpace(stderr))
+                Console.WriteLine(stderr.Trim());
+            return false;
+        }
+
+        if (!File.Exists(glbPath))
+        {
+            Console.WriteLine("IfcCovert complete but model.glb was not found.");
+            return false;
+        }
+
+        Console.WriteLine($"Wrote model.glb ({glbPath})");
+        return true;
+    }
+    catch (System.ComponentModel.Win32Exception)
+    {
+        Console.WriteLine("IfcConvert was not found on PATH");
+        Console.WriteLine("Install IfcOpenShell and ensure IfcConvert is available, or set IFCQA_IFCCONVERT=/path/to/IfcConvert");
+        return false;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"IfcConvert error: {ex.Message}");
+        return false;
+    }
+}
 
