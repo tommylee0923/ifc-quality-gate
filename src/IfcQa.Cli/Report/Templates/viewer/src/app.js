@@ -115,28 +115,30 @@ async function main() {
       let found = null;
       let checked = 0;
 
+      const objectsByGlobalId = new Map();
       gltf.scene.traverse((obj) => {
-        if (found) return;
-        checked++;
+        const gid = obj.name;
+        if (!gid) return;
 
-        const hit = findAnyGlobalIdInText(obj, sampleGids);
-        if (hit) {
-          found = { obj, ...hit };
-        }
+        if (!obj.isMesh) return;
+
+        if (!objectsByGlobalId.has(gid)) objectsByGlobalId.set(gid, []);
+        objectsByGlobalId.get(gid).push(obj);
       });
 
-      console.log("Traverse checked nodes:", checked);
+      console.log("Meshes indexed by GlobalId:", objectsByGlobalId.size);
+      // console.log("Traverse checked nodes:", checked);
 
-      if (found) {
-        console.log("✅ Found GlobalId inside GLB metadata!");
-        console.log("Where:", found.where);
-        console.log("Matched gid:", found.gid);
-        console.log("Text:", found.text);
-        console.log("Object:", found.obj);
-      } else {
-        console.log("❌ No GlobalId found in name/userData (Path A likely not viable).");
-        console.log("Next would be Path B: generate map.json during export.");
-      }
+      // if (found) {
+      //   console.log("✅ Found GlobalId inside GLB metadata!");
+      //   console.log("Where:", found.where);
+      //   console.log("Matched gid:", found.gid);
+      //   console.log("Text:", found.text);
+      //   console.log("Object:", found.obj);
+      // } else {
+      //   console.log("❌ No GlobalId found in name/userData (Path A likely not viable).");
+      //   console.log("Next would be Path B: generate map.json during export.");
+      // }
     },
     (progress) => {
       // optional
@@ -154,3 +156,96 @@ async function main() {
 }
 
 main().catch(console.error);
+
+let selectedGid = null;
+const originalMaterials = new WeakMap();
+
+function setHighlighted(mesh, on) {
+  if (!mesh.isMesh) return;
+
+  if (on) {
+    if (!originalMaterials.has(mesh)) originalMaterials.set(mesh, mesh.material);
+    mesh.material = new THREE.MeshStandardMaterial({ emissive: 0xffcc00, emissingIntensity: 0.8});
+  } else {
+    const orig = originalMaterials.get(mesh);
+    if (orig) mesh.material = orig;
+  }
+}
+
+function clearSelection(objectsByGlobalId) {
+  if (!selectedGid) return;
+  const prev = objectsByGlobalId.get(selectedGid) ?? [];
+  for (const m of prev) setHighlighted(m, false);
+  selectedGid = null;
+}
+
+function selectedGlobalId(gid, objectsByGlobalId) {
+  clearSelection(objectsByGlobalId);
+
+  selectedGid = gid;
+  const meshes = objectsByGlobalId.get(gid) ?? [];
+  for (const m of meshes) setHighlighted(m, true);
+  focusOnGlobalId(gid, objectsByGlobalId, camera, controls);
+  showIssuesForGlobalId(gid);
+
+
+  console.log("Selected:", gid, "meshes:", meshes.length);
+}
+
+function focusOnGlobalId(gid, objectsByGlobalId, camera, controls) {
+  const meshes = objectsByGlobalId.get(gid) ?? [];
+  if (meshes,length == 0) return;
+
+  const group = new THREE.Group();
+  for (const m of meshes) group.add(m);
+
+  const box = new THREE.Box3().setFromObject(group);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3()).length();
+
+  controls.target.copy(center);
+
+  const dir = new THREE.Vector3(1, 1, 1).normalize();
+  camera.position.copy(center).add(dir.multiplyScalar(Math.max(size, 1) * 0.8));
+
+  camera.near  = Math.max(size / 1000, 0.01);
+  camera.far = Math.max(size * 20, 1000);
+  camera.updateProjectionMatrix();
+  controls.update();
+}
+
+// Raycaster
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function onCanvasClick(ev) {
+  const rect = renderer.domElement.getBoundigClientRect();
+  mouse.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -(((ev.clientY - rect.top) / rect.height) * 2 - 1);
+
+  raycaster.setFromCamera(mouse, camera);
+
+  const hits = raycaster.intersectObject(gltf.scene, true);
+  if (!hits.length) return;
+
+  const hit = hits[0].object;
+  const gid = hit.name;
+  if (!gid) return;
+
+  selectedGlobalId(gid, objectsByGlobalId);
+  showIssuesForGlobalId(gid);
+}
+
+renderer.domElement.addEventListener("click", onCanvasClick);
+
+const viewerInfo = document.getElementById("viewerInfo");
+
+function showIssuesForGlobalId(gid) {
+    const list = issuesByGid.get(gid) ?? [];
+    if (!viewerInfo) return;
+
+    const header = `${gid} - ${list.length} issue(s)`;
+    const lines = list.slice(0, 8).map(it => `-[${it.Severity}] ${it.Message}`);
+    viewerInfo.textContent = [header, ...lines].join("\n");
+}
