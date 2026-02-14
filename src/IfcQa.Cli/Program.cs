@@ -278,7 +278,7 @@ static bool TryRunIfcConvertToGlb(string ifcPath, string glbPath)
 {
     var ifcConvertExe = Environment.GetEnvironmentVariable("IFCQA_IFCCONVERT");
     if (string.IsNullOrWhiteSpace(ifcConvertExe))
-        ifcConvertExe = "ifcConvert";
+        ifcConvertExe = "IfcConvert";
 
     var psi = new System.Diagnostics.ProcessStartInfo
     {

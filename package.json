@@ -4,8 +4,7 @@
   "description": "[![IFC QA](https://github.com/tommylee0923/ifc-quality-gate/actions/workflows/ifcqa.yml/badge.svg)](https://github.com/tommylee0923/ifc-quality-gate/actions/workflows/ifcqa.yml)",
   "main": "index.js",
   "directories": {
-    "doc": "docs",
-    "test": "tests"
+    "doc": "docs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

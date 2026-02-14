@@ -583,3 +583,5 @@ if (btnClearRuleset) {
     rerenderAndPersist();
   });
 }
+
+window.dispatchEvent(new CustomEvent("ifcqa:select", {detail: { gid: issue.GlobalId } }));

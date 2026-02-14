@@ -1,12 +1,32 @@
+console.log("viewer src/app.js booted");
+
+window.addEventListener("error", (e) => console.log("WINDOW ERROR:", e.message));
+window.addEventListener("unhandledrejection", (e) => console.log("PROMISE ERROR:", e.reason));
+
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+const state = {
+  renderer: null,
+  scene: null,
+  camera: null,
+  controls: null,
+
+  modelRoot: null,                 // gltf.scene
+  objectsByGlobalId: new Map(),    // gid -> Mesh[]
+  issuesByGid: new Map(),          // gid -> Issue[]
+
+  selectedGid: null,
+  originalMaterials: new WeakMap(),
+
+  viewerInfo: null,
+};
+
 async function fetchIssues() {
   const res = await fetch("./issues.json");
   const data = await res.json();
-  const issues = data.Issues ?? data.issues ?? [];
-  return issues;
+  return data.Issues ?? data.issues ?? [];
 }
 
 function buildIssuesByGlobalId(issues) {
@@ -20,181 +40,40 @@ function buildIssuesByGlobalId(issues) {
   return map;
 }
 
-function findAnyGlobalIdInText(obj, sampleGids) {
-  // Look in common places the converter might store identifiers
-  const candidates = [];
-
-  if (obj.name) candidates.push(["name", obj.name]);
-  if (obj.uuid) candidates.push(["uuid", obj.uuid]);
-
-  // userData can contain extras
-  if (obj.userData) {
-    for (const [k, v] of Object.entries(obj.userData)) {
-      if (typeof v === "string") candidates.push([`userData.${k}`, v]);
-      if (v && typeof v === "object") {
-        // shallow scan
-        for (const [k2, v2] of Object.entries(v)) {
-          if (typeof v2 === "string") candidates.push([`userData.${k}.${k2}`, v2]);
-        }
-      }
-    }
-  }
-
-  // Return the first match against sample gids
-  for (const [where, text] of candidates) {
-    for (const gid of sampleGids) {
-      if (text.includes(gid)) return { where, text, gid };
-    }
+// Some GLB pipelines store gid on parent nodes; climb up to find a name.
+function findNamedAncestor(obj) {
+  let cur = obj;
+  while (cur) {
+    if (cur.name) return cur;
+    cur = cur.parent;
   }
   return null;
 }
 
-async function main() {
-  const canvas = document.getElementById("viewerCanvas");
-  if (!canvas) {
-    console.warn("viewerCanvas not found. Add <canvas id='viewerCanvas'> to report.");
-    return;
-  }
-
-  const issues = await fetchIssues();
-  console.log("Issues loaded:", issues.length);
-
-  const issuesByGid = buildIssuesByGlobalId(issues);
-  console.log("Unique GlobalIds:", issuesByGid.size);
-
-  // Take a few sample gids from your issues to test against GLB metadata
-  const sampleGids = Array.from(issuesByGid.keys()).slice(0, 20);
-  console.log("Sample gids:", sampleGids);
-
-  // Basic three setup
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
-  camera.position.set(10, 10, 10);
-
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0, 0);
-  controls.update();
-
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.0));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-  dir.position.set(10, 20, 10);
-  scene.add(dir);
-
-  function resize() {
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  // Load GLB
-  const loader = new GLTFLoader();
-  loader.load(
-    "./model.glb",
-    (gltf) => {
-      scene.add(gltf.scene);
-
-      // Fit camera roughly (optional)
-      const box = new THREE.Box3().setFromObject(gltf.scene);
-      const size = box.getSize(new THREE.Vector3()).length();
-      const center = box.getCenter(new THREE.Vector3());
-      controls.target.copy(center);
-      camera.near = size / 1000;
-      camera.far = size * 10;
-      camera.position.copy(center).add(new THREE.Vector3(size / 3, size / 3, size / 3));
-      camera.updateProjectionMatrix();
-      controls.update();
-
-      // === PATH A TEST ===
-      let found = null;
-      let checked = 0;
-
-      const objectsByGlobalId = new Map();
-      gltf.scene.traverse((obj) => {
-        const gid = obj.name;
-        if (!gid) return;
-
-        if (!obj.isMesh) return;
-
-        if (!objectsByGlobalId.has(gid)) objectsByGlobalId.set(gid, []);
-        objectsByGlobalId.get(gid).push(obj);
-      });
-
-      console.log("Meshes indexed by GlobalId:", objectsByGlobalId.size);
-      // console.log("Traverse checked nodes:", checked);
-
-      // if (found) {
-      //   console.log("✅ Found GlobalId inside GLB metadata!");
-      //   console.log("Where:", found.where);
-      //   console.log("Matched gid:", found.gid);
-      //   console.log("Text:", found.text);
-      //   console.log("Object:", found.obj);
-      // } else {
-      //   console.log("❌ No GlobalId found in name/userData (Path A likely not viable).");
-      //   console.log("Next would be Path B: generate map.json during export.");
-      // }
-    },
-    (progress) => {
-      // optional
-    },
-    (err) => {
-      console.error("Failed to load model.glb:", err);
-    }
-  );
-
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
-}
-
-main().catch(console.error);
-
-let selectedGid = null;
-const originalMaterials = new WeakMap();
-
 function setHighlighted(mesh, on) {
-  if (!mesh.isMesh) return;
+  if (!mesh?.isMesh) return;
 
   if (on) {
-    if (!originalMaterials.has(mesh)) originalMaterials.set(mesh, mesh.material);
-    mesh.material = new THREE.MeshStandardMaterial({ emissive: 0xffcc00, emissingIntensity: 0.8});
+    if (!state.originalMaterials.has(mesh)) state.originalMaterials.set(mesh, mesh.material);
+    mesh.material = new THREE.MeshStandardMaterial({
+      emissive: 0xffcc00,
+      emissiveIntensity: 0.9,
+    });
   } else {
-    const orig = originalMaterials.get(mesh);
+    const orig = state.originalMaterials.get(mesh);
     if (orig) mesh.material = orig;
   }
 }
 
-function clearSelection(objectsByGlobalId) {
-  if (!selectedGid) return;
-  const prev = objectsByGlobalId.get(selectedGid) ?? [];
+function clearSelection() {
+  if (!state.selectedGid) return;
+  const prev = state.objectsByGlobalId.get(state.selectedGid) ?? [];
   for (const m of prev) setHighlighted(m, false);
-  selectedGid = null;
+  state.selectedGid = null;
 }
 
-function selectedGlobalId(gid, objectsByGlobalId) {
-  clearSelection(objectsByGlobalId);
-
-  selectedGid = gid;
-  const meshes = objectsByGlobalId.get(gid) ?? [];
-  for (const m of meshes) setHighlighted(m, true);
-  focusOnGlobalId(gid, objectsByGlobalId, camera, controls);
-  showIssuesForGlobalId(gid);
-
-
-  console.log("Selected:", gid, "meshes:", meshes.length);
-}
-
-function focusOnGlobalId(gid, objectsByGlobalId, camera, controls) {
-  const meshes = objectsByGlobalId.get(gid) ?? [];
-  if (meshes,length == 0) return;
+function focusOnMeshes(meshes) {
+  if (!meshes.length) return;
 
   const group = new THREE.Group();
   for (const m of meshes) group.add(m);
@@ -203,49 +82,164 @@ function focusOnGlobalId(gid, objectsByGlobalId, camera, controls) {
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3()).length();
 
-  controls.target.copy(center);
+  state.controls.target.copy(center);
 
   const dir = new THREE.Vector3(1, 1, 1).normalize();
-  camera.position.copy(center).add(dir.multiplyScalar(Math.max(size, 1) * 0.8));
+  state.camera.position.copy(center).add(dir.multiplyScalar(Math.max(size, 1) * 0.8));
 
-  camera.near  = Math.max(size / 1000, 0.01);
-  camera.far = Math.max(size * 20, 1000);
-  camera.updateProjectionMatrix();
-  controls.update();
+  state.camera.near = Math.max(size / 1000, 0.01);
+  state.camera.far = Math.max(size * 20, 1000);
+  state.camera.updateProjectionMatrix();
+  state.controls.update();
 }
 
-// Raycaster
+function showIssuesForGlobalId(gid) {
+  if (!state.viewerInfo) return;
 
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+  const list = state.issuesByGid.get(gid) ?? [];
+  const header = `${gid} — ${list.length} issue(s)`;
+  const lines = list.slice(0, 8).map(it => `- [${it.Severity}] ${it.Message}`);
+  state.viewerInfo.textContent = [header, ...lines].join("\n");
+}
 
-function onCanvasClick(ev) {
-  const rect = renderer.domElement.getBoundigClientRect();
-  mouse.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -(((ev.clientY - rect.top) / rect.height) * 2 - 1);
+function selectGlobalId(gid) {
+  clearSelection();
 
-  raycaster.setFromCamera(mouse, camera);
+  state.selectedGid = gid;
+  const meshes = state.objectsByGlobalId.get(gid) ?? [];
 
-  const hits = raycaster.intersectObject(gltf.scene, true);
+  for (const m of meshes) setHighlighted(m, true);
+  focusOnMeshes(meshes);
+  showIssuesForGlobalId(gid);
+
+  console.log("Selected gid:", gid, "meshes:", meshes.length);
+}
+
+function onCanvasPick(ev) {
+  if (!state.modelRoot) {
+    console.log("Model not loaded yet.");
+    return;
+  }
+
+  const rect = state.renderer.domElement.getBoundingClientRect();
+  const mouse = new THREE.Vector2(
+    ((ev.clientX - rect.left) / rect.width) * 2 - 1,
+    -(((ev.clientY - rect.top) / rect.height) * 2 - 1)
+  );
+
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, state.camera);
+
+  const hits = raycaster.intersectObject(state.modelRoot, true);
+  console.log("hits:", hits.length);
+
   if (!hits.length) return;
 
   const hit = hits[0].object;
-  const gid = hit.name;
-  if (!gid) return;
+  const named = findNamedAncestor(hit);
+  const gid = named?.name;
 
-  selectedGlobalId(gid, objectsByGlobalId);
-  showIssuesForGlobalId(gid);
+  console.log("hit name:", hit.name);
+  console.log("resolved gid:", gid);
+
+  if (gid) selectGlobalId(gid);
 }
 
-renderer.domElement.addEventListener("click", onCanvasClick);
+async function main() {
+  let isDragging = false;
+  let downPos = { x: 0, y: 0 };
 
-const viewerInfo = document.getElementById("viewerInfo");
+  const DRAG_PX = 6;
 
-function showIssuesForGlobalId(gid) {
-    const list = issuesByGid.get(gid) ?? [];
-    if (!viewerInfo) return;
+  const canvas = document.getElementById("viewerCanvas");
+  if (!canvas) {
+    console.warn("viewerCanvas not found. Add <canvas id='viewerCanvas'> to report.");
+    return;
+  }
 
-    const header = `${gid} - ${list.length} issue(s)`;
-    const lines = list.slice(0, 8).map(it => `-[${it.Severity}] ${it.Message}`);
-    viewerInfo.textContent = [header, ...lines].join("\n");
+  state.viewerInfo = document.getElementById("viewerInfo") ?? null;
+
+  // Load issues and build lookup
+  const issues = await fetchIssues();
+  state.issuesByGid = buildIssuesByGlobalId(issues);
+  console.log("Issues loaded:", issues.length, "Unique gids:", state.issuesByGid.size);
+
+  // Three setup
+  state.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  state.renderer.setPixelRatio(window.devicePixelRatio);
+
+  state.scene = new THREE.Scene();
+  state.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
+  state.camera.position.set(10, 10, 10);
+
+  state.controls = new OrbitControls(state.camera, state.renderer.domElement);
+  state.controls.update();
+
+  state.scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.0));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+  dir.position.set(10, 20, 10);
+  state.scene.add(dir);
+
+  function resize() {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    state.renderer.setSize(w, h, false);
+    state.camera.aspect = w / h;
+    state.camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  state.renderer.domElement.addEventListener("pointerdown", (e) => {
+    isDragging = false;
+    downPos = { x: e.clientX, y: e.clientY };
+  });
+
+  state.renderer.domElement.addEventListener("pointermove", (e) => {
+    const dx = e.clientX - downPos.x;
+    const dy = e.clientY - downPos.y;
+    if (dx * dx + dy * dy > DRAG_PX * DRAG_PX) isDragging = true;
+  });
+
+  // pointerup as “click” event
+  state.renderer.domElement.addEventListener("pointerup", (e) => {
+    if (isDragging) return;
+    if (e.button !== 0) return;
+    onCanvasPick(e);
+  });
+
+  // Load GLB
+  const loader = new GLTFLoader();
+  loader.load("./model.glb", (gltf) => {
+    state.modelRoot = gltf.scene;
+    state.scene.add(state.modelRoot);
+
+    // Build objectsByGlobalId
+    state.objectsByGlobalId = new Map();
+    state.modelRoot.traverse((obj) => {
+      if (!obj.isMesh) return;
+      const gid = obj.name;
+      if (!gid) return;
+
+      if (!state.objectsByGlobalId.has(gid)) state.objectsByGlobalId.set(gid, []);
+      state.objectsByGlobalId.get(gid).push(obj);
+    });
+
+    console.log("GLB loaded. Meshes indexed by GlobalId:", state.objectsByGlobalId.size);
+  }, undefined, (err) => {
+    console.error("Failed to load model.glb:", err);
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    state.renderer.render(state.scene, state.camera);
+  }
+  animate();
 }
+
+main().catch(console.error);
+
+window.addEventListener("ifcqa:select", (e) => {
+  const gid = e.detail?.gid;
+  if (gid) selectGlobalId(gid);
+});
